@@ -1,36 +1,42 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../../core/services/auth.service';
-import { User } from '../../../core/models/user.model';
+
+// Interfaz para el tipado estricto
+interface User {
+  firstName: string;
+  lastName: string;
+  username: string;
+  email: string;
+  birthDate: string;
+  description: string;
+  role: string;
+  avatarUrl?: string;
+}
 
 @Component({
   selector: 'app-my-profile',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './my-profile.component.html',
-  styleUrls: ['./my-profile.component.scss']
+  templateUrl: './my-profile.component.html'
 })
 export class MyProfileComponent implements OnInit {
   userProfile: User | null = null;
 
-  constructor(private authService: AuthService) {}
+ngOnInit(): void {
+  const savedUser = localStorage.getItem('user');
+  console.log('Datos en crudo recuperados:', savedUser);
 
-  ngOnInit(): void {
-    this.authService.currentUser$.subscribe(user => {
-      if (user) {
-        this.userProfile = user;
-      } else {
-        this.userProfile = {
-          firstName: 'Mateo',
-          lastName: 'UTN',
-          email: 'mateo@utn.edu.ar',
-          username: 'mateoutn',
-          birthDate: '2000-01-01',
-          description: 'Estudiante de programación y entusiasta del desarrollo de aplicaciones.',
-          avatarUrl: 'https://via.placeholder.com/150',
-          role: 'usuario'
-        };
-      }
-    });
+  // CORREGIDO: Validamos estrictamente que exista y no sea el string "undefined"
+  if (savedUser && savedUser !== 'undefined') {
+    try {
+      const parsed = JSON.parse(savedUser);
+      this.userProfile = parsed?.data ? parsed.data : parsed;
+      console.log('Objeto asignado con éxito:', this.userProfile);
+    } catch (error) {
+      console.error('Error al parsear el usuario:', error);
+    }
+  } else {
+    console.log('La clave "user" no existe en el localStorage o es undefined.');
   }
+}
 }

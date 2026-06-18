@@ -27,25 +27,19 @@ export class LoginComponent {
     });
   }
 
-  onSubmit(): void {
-    if (this.loginForm.invalid) {
-      this.loginForm.markAllAsTouched();
-      return;
-    }
-
-    this.errorMessage = '';
-    this.successMessage = '';
-
+onSubmit(): void {
+  if (this.loginForm.valid) {
     this.authService.login(this.loginForm.value).subscribe({
-      next: (res) => {
-        this.successMessage = 'Ingreso exitoso. Redirigiendo...';
-        setTimeout(() => {
-          this.router.navigate(['/publications']);
-        }, 1500);
+      next: (response) => {
+        console.log('Respuesta del Backend en el login:', response);
+        
+        localStorage.setItem('user', JSON.stringify(response));
+        
+        this.router.navigate(['/profile']);
       },
       error: (err) => {
-        this.errorMessage = err.error?.error || 'Error al intentar ingresar. Compruebe credenciales.';
+        this.errorMessage = 'Credenciales inválidas';
       }
     });
   }
-}
+}}
