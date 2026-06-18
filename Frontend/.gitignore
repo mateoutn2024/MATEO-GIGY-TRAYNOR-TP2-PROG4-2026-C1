@@ -1,0 +1,24 @@
+# Directorios de dependencias y compilación
+/node_modules/
+/dist/
+/.angular/
+
+# Caché e información del sistema
+.cache/
+.sass-cache/
+connect.lock
+syslog
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Configuración del Entorno Local e IDEs
+.env
+.env.local
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

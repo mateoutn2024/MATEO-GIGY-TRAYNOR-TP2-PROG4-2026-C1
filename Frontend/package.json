@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "@angular/common": "^18.2.14",
+    "@angular/compiler": "^18.2.14",
+    "@angular/core": "^18.2.14",
+    "@angular/forms": "^18.2.14",
+    "@angular/platform-browser": "^18.2.14",
+    "@angular/router": "^18.2.14",
+    "rxjs": "^7.8.2"
+  }
+}
