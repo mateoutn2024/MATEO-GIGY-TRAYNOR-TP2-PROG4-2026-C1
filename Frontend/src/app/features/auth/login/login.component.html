@@ -1,0 +1,32 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <h2>Iniciar Sesión</h2>
+    <p class="subtitle">Ingresa a la red social universitaria</p>
+
+    <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+    <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+
+    <form [formGroup].="loginForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="identifier">Usuario o Correo Electrónico</label>
+        <input id="identifier" type="text" formControlName="identifier" placeholder="ejemplo@correo.com o usuario">
+        <div *ngIf="loginForm.get('identifier')?.touched && loginForm.get('identifier')?.invalid" class="error-msg">
+          Este campo es obligatorio.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Contraseña</label>
+        <input id="password" type="password" formControlName="password" placeholder="••••••••">
+        <div *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.invalid" class="error-msg">
+          <span *ngIf="loginForm.get('password')?.errors?.['required']">La contraseña es obligatoria.</span>
+          <span *ngIf="loginForm.get('password')?.errors?.['minlength']">Debe contener mínimo 8 caracteres.</span>
+        </div>
+      </div>
+
+      <button type="submit" [disabled]="loginForm.invalid" class="btn-submit">Ingresar</button>
+    </form>
+
+    <p class="foot-auth">¿No tienes cuenta? <a routerLink="/register">Regístrate aquí</a></p>
+  </div>
+</div>
