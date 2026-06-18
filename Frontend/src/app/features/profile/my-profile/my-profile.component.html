@@ -1,0 +1,18 @@
+<div class="profile-container">
+  <div class="profile-card" *ngIf="userProfile">
+    <div class="profile-header">
+      <img [src]="userProfile.avatarUrl" alt="Avatar" class="avatar">
+      <div>
+        <h2>{{ userProfile.firstName }} {{ userProfile.lastName }}</h2>
+        <p class="username">&#64;{{ userProfile.username }}</p>
+        <span class="badge">{{ userProfile.role | uppercase }}</span>
+      </div>
+    </div>
+    <div class="profile-body">
+      <p><strong>Email:</strong> {{ userProfile.email }}</p>
+      <p><strong>Fecha de nacimiento:</strong> {{ userProfile.birthDate }}</p>
+      <p><strong>Biografía:</strong></p>
+      <p class="description">{{ userProfile.description }}</p>
+    </div>
+  </div>
+</div>
