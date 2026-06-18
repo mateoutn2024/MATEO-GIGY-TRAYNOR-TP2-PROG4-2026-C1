@@ -6,7 +6,7 @@
     <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
     <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
 
-    <form [formGroup].="loginForm" (ngSubmit)="onSubmit()">
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
       <div class="form-group">
         <label for="identifier">Usuario o Correo Electrónico</label>
         <input id="identifier" type="text" formControlName="identifier" placeholder="ejemplo@correo.com o usuario">
@@ -24,7 +24,7 @@
         </div>
       </div>
 
-      <button type="submit" [disabled]="loginForm.invalid" class="btn-submit">Ingresar</button>
+      <button type="submit" [disabled]="loginForm.invalid" class="btn-primary">Ingresar</button>
     </form>
 
     <p class="foot-auth">¿No tienes cuenta? <a routerLink="/register">Regístrate aquí</a></p>
