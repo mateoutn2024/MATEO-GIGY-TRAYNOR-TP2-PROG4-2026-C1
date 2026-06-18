@@ -1,23 +1,19 @@
-<div class="profile-container">
+<div class="profile-container" style="max-width: 600px; margin: 0 auto; padding: 20px;">
   <div class="profile-card" *ngIf="userProfile">
-    
-    <div class="profile-header">
+    <div class="profile-header" style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
       <img [src]="userProfile.avatarUrl ? 'http://localhost:3000' + userProfile.avatarUrl : 'assets/default-avatar.png'" 
-           alt="Avatar de perfil" 
-           class="avatar">
+           alt="Avatar" class="avatar" style="width: 100px; height: 100px; object-fit: cover;">
       <div>
         <h2>{{ userProfile.firstName }} {{ userProfile.lastName }}</h2>
         <p class="username">&#64;{{ userProfile.username }}</p>
         <span class="badge">{{ userProfile.role | uppercase }}</span>
       </div>
     </div>
-
     <div class="profile-body">
       <p><strong>Email:</strong> {{ userProfile.email }}</p>
       <p><strong>Fecha de nacimiento:</strong> {{ userProfile.birthDate }}</p>
       <p><strong>Biografía:</strong></p>
-      <p class="description">{{ userProfile.description }}</p>
+      <p class="description" style="background: #f0f0f0; padding: 10px; border-radius: 4px;">{{ userProfile.description }}</p>
     </div>
-
   </div>
 </div>
