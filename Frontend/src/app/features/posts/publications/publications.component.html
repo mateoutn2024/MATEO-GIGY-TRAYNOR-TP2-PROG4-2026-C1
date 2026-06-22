@@ -1,3 +1,56 @@
-<div class="publications-container">
-  <h2>Muro de Publicaciones</h2>
+<div class="container-salladejuegos" style="padding: 20px; max-width: 800px; margin: 0 auto;">
+  
+  <div class="crear-publicacion-form" style="background: #f4f6f9; padding: 20px; border-radius: 8px; margin-bottom: 3px;">
+    <h3>Nueva Publicación</h3>
+    <div style="margin-bottom: 10px;">
+      <input type="text" #tituloInput placeholder="Título de la publicación" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
+    </div>
+    <div style="margin-bottom: 10px;">
+      <textarea #descInput placeholder="¿Qué estás pensando?" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; height: 80px;"></textarea>
+    </div>
+    <div style="margin-bottom: 10px;">
+      <input type="text" #imgInput placeholder="URL de la imagen (opcional)" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
+    </div>
+    <button (click)="crearPost(tituloInput.value, descInput.value, imgInput.value); tituloInput.value=''; descInput.value=''; imgInput.value=''" 
+            style="background: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;">
+      Publicar Posteo
+    </button>
+  </div>
+
+  <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+
+  <div class="filtros-bar" style="margin-bottom: 20px;">
+    <button (click)="cambiarOrden('fecha')" [class.active]="orden === 'fecha'">Más Recientes</button>
+    <button (click)="cambiarOrden('likes')" [class.active]="orden === 'likes'">Populares (Likes)</button>
+  </div>
+
+  <div class="listado-posts">
+    <div *ngFor="let pub of publicaciones" class="card-publicacion" style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: white;">
+      <div class="pub-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h4 style="margin: 0;">{{ pub.usuario?.firstName }} {{ pub.usuario?.lastName }}</h4>
+          <small style="color: #777;">{{ pub.createdAt | date:'short' }}</small>
+        </div>
+        <button *ngIf="pub.usuarioId === usuarioLogueadoId" (click)="eliminar(pub._id)" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Eliminar</button>
+      </div>
+      
+      <div class="pub-body" style="margin-top: 10px;">
+        <h3 style="margin: 0 0 10px 0;">{{ pub.titulo }}</h3>
+        <p>{{ pub.descripcion }}</p>
+        <img *ngIf="pub.imagenUrl" [src]="pub.imagenUrl" style="max-width: 100%; max-height: 300px; border-radius: 4px; margin-top: 10px;">
+      </div>
+
+      <div class="pub-footer" style="margin-top: 15px;">
+        <button (click)="manejarLike(pub)" style="background: #e2e6ea; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">
+          ❤️ {{ pub.likes?.length || 0 }} Likes
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="publicaciones.length === 0" class="no-posts" style="text-align: center; color: #666; padding: 20px;">
+    <p>No hay publicaciones activas en el muro. ¡Crea una arriba para testear!</p>
+  </div>
+
+  <button *ngIf="publicaciones.length > 0" (click)="cargarMas()" class="btn-cargar-mas">Cargar más</button>
 </div>
