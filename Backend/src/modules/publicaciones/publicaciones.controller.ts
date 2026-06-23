@@ -1,7 +1,11 @@
 import { 
   Controller, Get, Post, Delete, Body, Param, Query, 
-  UseGuards, Request, ForbiddenException, HttpCode, HttpStatus 
+  UseGuards, Request, ForbiddenException, HttpCode, HttpStatus,
+  UseInterceptors, UploadedFile, BadRequestException // 🌟 Agregados para Multer
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express'; // 🌟 Interceptor nativo
+import { diskStorage } from 'multer'; // 🌟 Configurador de disco
+import { extname } from 'path'; // 🌟 Para manejar las extensiones (.png, .jpg)
 import { PublicacionesService } from './publicaciones.service';
 import { AuthGuard } from '../auth/auth.guard';
 
@@ -12,12 +16,47 @@ export class PublicacionesController {
 
   @Post()
   @UseGuards(AuthGuard)
-  async crear(@Body() body: { titulo: string; descripcion: string; imagenUrl?: string; usuarioId?: string }, @Request() req) {
+  // 🌟 Interceptamos el campo 'imagen' que viene desde el FormData de Angular
+  @UseInterceptors(
+    FileInterceptor('imagen', {
+      storage: diskStorage({
+        destination: './uploads', // Carpeta raíz donde se guardarán las fotos
+        filename: (req, file, callback) => {
+          // Generamos un nombre único usando la fecha para que no se pisen archivos
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const ext = extname(file.originalname);
+          callback(null, `publicacion-${uniqueSuffix}${ext}`);
+        },
+      }),
+      fileFilter: (req, file, callback) => {
+        // Validamos que sea una imagen válida
+        if (!file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
+          return callback(new BadRequestException('Solo se permiten imágenes.'), false);
+        }
+        callback(null, true);
+      },
+    }),
+  )
+  async crear(
+    @Body() body: { titulo: string; descripcion: string; usuarioId?: string }, 
+    @Request() req,
+    @UploadedFile() file: Express.Multer.File // 🌟 Multer nos inyecta el archivo acá si existe
+  ) {
     console.log('====== ¡LLEGÓ UNA PETICIÓN POST A CONTROLADOR! ======', body);
 
     const userId = body.usuarioId || req.user?._id || req.user?.id;
 
-    return this.publicacionesService.crear(body, userId);
+    // Si subió archivo, armamos la URL pública; si no, queda vacío
+    const imagenUrl = file ? `/uploads/${file.filename}` : '';
+
+    // Armamos el objeto final combinando los textos con la nueva URL de la imagen
+    const nuevaPublicacionData = {
+      titulo: body.titulo,
+      descripcion: body.descripcion,
+      imagenUrl: imagenUrl
+    };
+
+    return this.publicacionesService.crear(nuevaPublicacionData, userId);
   }
 
   @Get()
@@ -32,24 +71,24 @@ export class PublicacionesController {
   }
 
   @Delete(':id')
-    @HttpCode(HttpStatus.NO_CONTENT)
-    async eliminar(
-      @Param('id') id: string, 
-      @Query('usuarioId') usuarioId: string, 
-      @Request() req
-    ) {
-      const userIdLogueado = usuarioId || req.user?._id || req.user?.id;
-      
-      const esDuenio = await this.publicacionesService.verificarDuenio(id, userIdLogueado);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async eliminar(
+    @Param('id') id: string, 
+    @Query('usuarioId') usuarioId: string, 
+    @Request() req
+  ) {
+    const userIdLogueado = usuarioId || req.user?._id || req.user?.id;
+    
+    const esDuenio = await this.publicacionesService.verificarDuenio(id, userIdLogueado);
 
-      if (!esDuenio) {
-        throw new ForbiddenException('No tienes permisos.');
-      }
-      
-      return this.publicacionesService.bajaLogica(id);
-    } 
+    if (!esDuenio) {
+      throw new ForbiddenException('No tienes permisos.');
+    }
+    
+    return this.publicacionesService.bajaLogica(id);
+  } 
 
-@Post(':id/like')
+  @Post(':id/like')
   async darLike(
     @Param('id') id: string, 
     @Query('usuarioId') usuarioId: string 
@@ -57,17 +96,12 @@ export class PublicacionesController {
     return this.publicacionesService.agregarLike(id, usuarioId);
   }
 
-@Delete(':id/like')
+  @Delete(':id/like')
   async quitarLike(
     @Param('id') pubId: string, 
     @Query('usuarioId') usuarioId: string
   ) {
     console.log('====== PETICIÓN DE QUITAR LIKE ======');
-    console.log('ID de la publicación recibido:', pubId);
-    console.log('ID del usuario recibido por Query:', usuarioId);
-    console.log('=====================================');
-
     return this.publicacionesService.removerLike(pubId, usuarioId);
   }
-
 }
