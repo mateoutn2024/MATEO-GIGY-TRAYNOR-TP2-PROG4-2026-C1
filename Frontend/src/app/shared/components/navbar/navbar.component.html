@@ -1,0 +1,12 @@
+<nav class="navbar">
+  <div class="nav-container">
+    <a class="nav-logo" routerLink="/publications">RedSocial</a>
+    <div class="nav-links">
+      <a routerLink="/publications" routerLinkActive="active">Publicaciones</a>
+      <a routerLink="/profile" routerLinkActive="active">Mi Perfil</a>
+      <a routerLink="/login" routerLinkActive="active">Login</a>
+      <a routerLink="/register" routerLinkActive="active">Registro</a>
+      <button (click)="logout()" class="btn-logout">Salir</button>
+    </div>
+  </div>
+</nav>
