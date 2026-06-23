@@ -24,11 +24,11 @@ export class PublicacionesService {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
 
-  darLike(id: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${id}/like`, {});
-  }
+  darLike(publicacionId: string, usuarioId: string): Observable<any> {
+      return this.http.post(`${this.apiUrl}/${publicacionId}/like?usuarioId=${usuarioId}`, {});
+    }
 
-  quitarLike(id: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}/like`);
+  quitarLike(publicacionId: string, usuarioId: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${publicacionId}/like?usuarioId=${usuarioId}`);
   }
 }

@@ -49,15 +49,25 @@ export class PublicacionesController {
       return this.publicacionesService.bajaLogica(id);
     } 
 
-  @Post(':id/like')
-  async darLike(@Param('id') id: string, @Request() req) {
-    const userId = req.user?._id || req.user?.id;
-    return this.publicacionesService.agregarLike(id, userId);
+@Post(':id/like')
+  async darLike(
+    @Param('id') id: string, 
+    @Query('usuarioId') usuarioId: string 
+  ) {
+    return this.publicacionesService.agregarLike(id, usuarioId);
   }
 
-  @Delete(':id/like')
-  async quitarLike(@Param('id') id: string, @Request() req) {
-    const userId = req.user?._id || req.user?.id;
-    return this.publicacionesService.removerLike(id, userId);
+@Delete(':id/like')
+  async quitarLike(
+    @Param('id') pubId: string, 
+    @Query('usuarioId') usuarioId: string
+  ) {
+    console.log('====== PETICIÓN DE QUITAR LIKE ======');
+    console.log('ID de la publicación recibido:', pubId);
+    console.log('ID del usuario recibido por Query:', usuarioId);
+    console.log('=====================================');
+
+    return this.publicacionesService.removerLike(pubId, usuarioId);
   }
+
 }

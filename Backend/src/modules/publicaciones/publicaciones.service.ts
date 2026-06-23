@@ -80,23 +80,30 @@ export class PublicacionesService {
     return this.publicacionModel.findByIdAndUpdate(id, { activo: false });
   }
 
-  async agregarLike(pubId: string, usrId: string) {
-    const pub = await this.publicacionModel.findById(pubId);
-    if (!pub) throw new NotFoundException('No existe la publicación');
-    
-    if (pub.likes.some(id => id.toString() === usrId)) {
-      throw new BadRequestException('Ya le diste like');
-    }
+async agregarLike(pubId: string, usrId: string) {
+    if (!usrId) throw new BadRequestException('El ID de usuario es requerido.');
 
-    pub.likes.push(new Types.ObjectId(usrId));
-    return pub.save();
+    // 🌟 Usamos findByIdAndUpdate con $addToSet para que NUNCA se duplique tu ID
+    const pub = await this.publicacionModel.findByIdAndUpdate(
+      pubId,
+      { $addToSet: { likes: new Types.ObjectId(usrId) } },
+      { returnDocument: 'after' }
+    );
+
+    if (!pub) throw new NotFoundException('No existe la publicación');
+    return pub;
   }
 
   async removerLike(pubId: string, usrId: string) {
-    const pub = await this.publicacionModel.findById(pubId);
-    if (!pub) throw new NotFoundException('No existe la publicación');
+    if (!usrId) throw new BadRequestException('El ID de usuario es requerido.');
 
-    pub.likes = pub.likes.filter(id => id.toString() !== usrId) as any;
-    return pub.save();
-  }
-}
+    // 🌟 Usamos findByIdAndUpdate con $pull para remover TODAS las instancias de ese ID de un saque
+    const pub = await this.publicacionModel.findByIdAndUpdate(
+      pubId,
+      { $pull: { likes: new Types.ObjectId(usrId) } },
+      { returnDocument: 'after' }
+    );
+
+    if (!pub) throw new NotFoundException('No existe la publicación');
+    return pub;
+  }}

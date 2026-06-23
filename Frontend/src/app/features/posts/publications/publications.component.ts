@@ -100,21 +100,27 @@ export class PublicationsComponent implements OnInit {
     this.cargarPublicaciones(true);
   }
 
-  manejarLike(pub: any): void {
+manejarLike(pub: any): void {
     if (!this.usuarioLogueadoId) return;
     
-    const yaTieneLike = pub.likes.includes(this.usuarioLogueadoId);
+    const yaTieneLike = pub.likes.some((id: any) => id.toString() === this.usuarioLogueadoId.toString());
+    
     if (yaTieneLike) {
-      this.pubService.quitarLike(pub._id).subscribe({
+      this.pubService.quitarLike(pub._id, this.usuarioLogueadoId).subscribe({
         next: () => {
-          pub.likes = pub.likes.filter((id: string) => id !== this.usuarioLogueadoId);
-        }
+          pub.likes = pub.likes.filter((id: any) => id.toString() !== this.usuarioLogueadoId.toString());
+          console.log('Like removido localmente y en base de datos');
+        },
+        error: (err: any) => console.error('Error al quitar el like:', err)
       });
     } else {
-      this.pubService.darLike(pub._id).subscribe({
+      console.log('-> Ejecutando camino de DAR LIKE');
+      this.pubService.darLike(pub._id, this.usuarioLogueadoId).subscribe({
         next: () => {
           pub.likes.push(this.usuarioLogueadoId);
-        }
+          console.log('Like agregado localmente y en base de datos');
+        },
+        error: (err: any) => console.error('Error al dar like:', err)
       });
     }
   }
