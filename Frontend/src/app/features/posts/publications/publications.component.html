@@ -8,8 +8,15 @@
     <div class="form-group">
       <textarea [(ngModel)]="nuevaDescripcion" placeholder="¿Qué estás pensando?"></textarea>
     </div>
+    
     <div class="form-group">
-      <input type="text" [(ngModel)]="nuevaImagenUrl" placeholder="URL de la imagen (opcional)">
+      <label for="foto-input" style="display: block; margin-bottom: 5px; font-weight: bold;">Subir Imagen (opcional):</label>
+      <input 
+        id="foto-input" 
+        type="file" 
+        accept="image/*" 
+        (change)="onFileSelected($event)"
+      >
     </div>
     <button class="btn-publicar" (click)="crearPost()">Publicar Posteo</button>
   </div>
@@ -34,16 +41,23 @@
       <div class="pub-body">
         <h3>{{ pub.titulo }}</h3>
         <p>{{ pub.descripcion }}</p>
-        <img *ngIf="pub.imagenUrl" [src]="pub.imagenUrl" class="pub-img">
+        
+        <img *ngIf="pub.imagenUrl" [src]="'http://localhost:3000' + pub.imagenUrl" class="pub-img">
       </div>
 
       <div class="pub-footer">
-        <button class="btn-like" (click)="manejarLike(pub)">
-          ❤️ {{ pub.likes?.length || 0 }} Likes
-        </button>
+          <button class="btn-like" (click)="manejarLike(pub)">
+            ❤️ {{ pub.likes?.length || 0 }} Likes
+          </button>
+
+          <div *ngIf="pub.comentarios && pub.comentarios.length > 0" class="seccion-comentarios" style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee; text-align: left;">
+            <h5 style="margin-bottom: 8px; color: #555;">💬 Comentarios:</h5>
+            <div *ngFor="let com of pub.comentarios" style="background: #f9f9f9; padding: 6px 10px; border-radius: 6px; margin-bottom: 6px; font-size: 13px;">
+              <strong style="color: #0056b3;">{{ com.autor }}:</strong> <span>{{ com.texto }}</span>
+            </div>
+          </div>
+        </div>  
       </div>
-    </div>
-  </div>
 
   <div *ngIf="publicaciones.length === 0" class="no-posts">
     <p>No hay publicaciones activas en el muro. ¡Crea una arriba para testear!</p>

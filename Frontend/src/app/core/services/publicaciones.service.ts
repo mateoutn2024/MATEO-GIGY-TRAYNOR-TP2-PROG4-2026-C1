@@ -16,8 +16,8 @@ export class PublicacionesService {
     return this.http.get<any[]>(url);
   }
 
-  crearPublicacion(pub: { titulo: string; descripcion: string; imagenUrl?: string }): Observable<any> {
-    return this.http.post<any>(this.apiUrl, pub);
+crearPublicacion(formData: FormData): Observable<any> {
+    return this.http.post(this.apiUrl, formData);
   }
 
   eliminarPublicacion(id: string): Observable<any> {
