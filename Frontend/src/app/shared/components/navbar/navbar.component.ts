@@ -15,6 +15,13 @@ export class NavbarComponent {
 
   logout(): void {
     this.authService.logout();
-    this.router.navigate(['/login']);
+
+    localStorage.removeItem('user');
+    localStorage.clear();
+    sessionStorage.clear();
+
+    this.router.navigate(['/login']).then(() => {
+      window.location.reload();
+    });
   }
 }

@@ -1,36 +1,201 @@
-.publications-container {
-  max-width: 800px;
+.muro-container {
+  padding: 20px;
+  max-width: 700px;
   margin: 0 auto;
-  padding: 1rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
-  h2 {
-    color: #1e293b;
-    margin-bottom: 1.5rem;
-  }
-
-  .publication-card {
+  .form-publicacion {
     background: #ffffff;
-    padding: 1.5rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    margin-bottom: 1.5rem;
-    border-left: 4px solid #3b82f6;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eef2f5;
 
     h3 {
-      margin: 0 0 0.5rem 0;
-      color: #1e293b;
+      margin-top: 0;
+      margin-bottom: 16px;
+      color: #333;
     }
 
-    .author {
-      font-size: 0.85rem;
-      color: #64748b;
-      margin-bottom: 0.75rem;
+    .form-group {
+      margin-bottom: 12px;
+
+      input, textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 6px;
+        border: 1px solid #cbd5e1;
+        font-size: 14px;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+
+        &:focus {
+          outline: none;
+          border-color: #3b82f6;
+        }
+      }
+
+      textarea {
+        height: 90px;
+        resize: none;
+      }
+    }
+
+    .btn-publicar {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+
+      &:hover {
+        background: #1d4ed8;
+      }
+    }
+  }
+
+  .divisor {
+    margin: 24px 0;
+    border: 0;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .filtros-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+
+    .btn-filtro {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 13px;
       font-weight: 500;
+      color: #64748b;
+      transition: all 0.2s;
+
+      &:hover {
+        background: #e2e8f0;
+      }
+
+      &.active {
+        background: #334155;
+        color: white;
+        border-color: #334155;
+      }
+    }
+  }
+
+  .card-publicacion {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+
+    .pub-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+
+      h4 {
+        margin: 0;
+        color: #1e293b;
+        font-size: 15px;
+      }
+
+      small {
+        color: #94a3b8;
+      }
+
+      .btn-eliminar {
+        background: #ef4444;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+
+        &:hover {
+          background: #dc2626;
+        }
+      }
     }
 
-    .message {
-      color: #334155;
-      line-height: 1.5;
+    .pub-body {
+      h3 {
+        margin: 0 0 8px 0;
+        color: #0f172a;
+        font-size: 18px;
+      }
+
+      p {
+        margin: 0;
+        color: #334155;
+        line-height: 1.5;
+      }
+
+      .pub-img {
+        max-width: 100%;
+        max-height: 350px;
+        border-radius: 8px;
+        margin-top: 12px;
+        object-fit: cover;
+      }
+    }
+
+    .pub-footer {
+      margin-top: 14px;
+      border-top: 1px solid #f1f5f9;
+      padding-top: 12px;
+
+      .btn-like {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        padding: 6px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        transition: background 0.2s;
+
+        &:hover {
+          background: #f1f5f9;
+        }
+      }
+    }
+  }
+
+  .no-posts {
+    text-align: center;
+    color: #64748b;
+    padding: 40px;
+    background: #f8fafc;
+    border-radius: 8px;
+  }
+
+  .btn-cargar-mas {
+    display: block;
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    font-weight: 500;
+    color: #334155;
+
+    &:hover {
+      background: #f8fafc;
     }
   }
 }

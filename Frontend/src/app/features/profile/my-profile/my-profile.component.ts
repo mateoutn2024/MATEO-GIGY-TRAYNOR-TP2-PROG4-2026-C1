@@ -1,62 +1,66 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { PublicacionesService } from '../../../core/services/publicaciones.service'; 
-
-interface User {
-  _id?: string; 
-  firstName: string;
-  lastName: string;
-  username: string;
-  email: string;
-  birthDate: string;
-  description: string;
-  role: string;
-  avatarUrl?: string;
-}
+import { CommonModule, DatePipe } from '@angular/common';
+import { PublicacionesService } from '../../../core/services/publicaciones.service';
 
 @Component({
   selector: 'app-my-profile',
   standalone: true,
-  imports: [CommonModule],
-  templateUrl: './my-profile.component.html'
+  imports: [CommonModule, DatePipe],
+  templateUrl: './my-profile.component.html',
+  styleUrls: ['./my-profile.component.scss']
 })
 export class MyProfileComponent implements OnInit {
-  userProfile: User | null = null;
-  misUltimasPublicaciones: any[] = []; 
+  userProfile: any = null;
+  misPublicaciones: any[] = []; 
 
   constructor(private pubService: PublicacionesService) {}
 
-  ngOnInit(): void {
+ngOnInit(): void {
     const savedUser = localStorage.getItem('user');
-    console.log('Datos en crudo recuperados:', savedUser);
 
     if (savedUser && savedUser !== 'undefined') {
       try {
         const parsed = JSON.parse(savedUser);
         this.userProfile = parsed?.data ? parsed.data : parsed;
-        console.log('Objeto asignado con éxito:', this.userProfile);
 
-        if (this.userProfile && (this.userProfile._id || parsed._id)) {
+        if (this.userProfile) {
           const userId = this.userProfile._id || parsed._id;
-          this.cargarMisPublicaciones(userId);
+          
+          if (userId) {
+            this.cargarMisPublicaciones(userId);
+          }
         }
       } catch (error) {
-        console.error('Error al parsear el usuario:', error);
+        console.error('Error al procesar el perfil:', error);
+        this.userProfile = null;
+        this.misPublicaciones = [];
       }
     } else {
-      console.log('La clave "user" no existe en el localStorage o es undefined.');
+      this.userProfile = null;
+      this.misPublicaciones = [];
     }
   }
 
-  cargarMisPublicaciones(userId: string): void {
-    this.pubService.obtenerPublicaciones('fecha', 3, 0, userId).subscribe({
-      next: (res) => {
-        this.misUltimasPublicaciones = res;
-        console.log('Últimas 3 publicaciones cargadas:', this.misUltimasPublicaciones);
+cargarMisPublicaciones(userId: any): void {
+    const targetUserId = userId._id ? userId._id.toString() : userId.toString();
+    console.log('ID buscado en el filtro (String):', targetUserId);
+
+    this.pubService.obtenerPublicaciones('fecha', 100, 0).subscribe({
+      next: (res: any) => {
+        const lista = res?.data ? res.data : (Array.isArray(res) ? res : []);
+        
+        this.misPublicaciones = lista
+          .filter((p: any) => {
+            if (!p.usuarioId) return false;
+            
+            const postCreatorId = p.usuarioId._id ? p.usuarioId._id.toString() : p.usuarioId.toString();
+            
+            return postCreatorId === targetUserId;
+          })
+          .slice(0, 3); 
+
+        console.log('Últimas 3 publicaciones asignadas al perfil:', this.misPublicaciones);
       },
-      error: (err) => {
-        console.error('Error al obtener las publicaciones del perfil:', err);
-      }
+      error: (err: any) => console.error('Error al obtener posteos del usuario:', err)
     });
-  }
-}
+  }}
