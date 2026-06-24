@@ -52,7 +52,6 @@ cargarPublicaciones(append = false): void {
       next: (res: any) => { 
         let listaFila = res?.data ? res.data : (Array.isArray(res) ? res : []);
         
-        // 🌟 INYECCIÓN DE COMENTARIOS HARDCODEADOS EN LAS 3 PRIMERAS PUBLICACIONES
         if (listaFila.length > 0 && !append) {
           // Publicación 1 (La primera del muro)
           if (listaFila[0]) {
