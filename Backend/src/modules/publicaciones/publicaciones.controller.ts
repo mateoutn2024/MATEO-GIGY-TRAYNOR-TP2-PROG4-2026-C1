@@ -1,11 +1,11 @@
 import { 
   Controller, Get, Post, Delete, Body, Param, Query, 
   UseGuards, Request, ForbiddenException, HttpCode, HttpStatus,
-  UseInterceptors, UploadedFile, BadRequestException // 🌟 Agregados para Multer
+  UseInterceptors, UploadedFile, BadRequestException 
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express'; // 🌟 Interceptor nativo
-import { diskStorage } from 'multer'; // 🌟 Configurador de disco
-import { extname } from 'path'; // 🌟 Para manejar las extensiones (.png, .jpg)
+import { FileInterceptor } from '@nestjs/platform-express'; 
+import { diskStorage } from 'multer'; 
+import { extname } from 'path';
 import { PublicacionesService } from './publicaciones.service';
 import { AuthGuard } from '../auth/auth.guard';
 
@@ -16,20 +16,17 @@ export class PublicacionesController {
 
   @Post()
   @UseGuards(AuthGuard)
-  // 🌟 Interceptamos el campo 'imagen' que viene desde el FormData de Angular
   @UseInterceptors(
     FileInterceptor('imagen', {
       storage: diskStorage({
-        destination: './uploads', // Carpeta raíz donde se guardarán las fotos
+        destination: './uploads', 
         filename: (req, file, callback) => {
-          // Generamos un nombre único usando la fecha para que no se pisen archivos
           const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
           const ext = extname(file.originalname);
           callback(null, `publicacion-${uniqueSuffix}${ext}`);
         },
       }),
       fileFilter: (req, file, callback) => {
-        // Validamos que sea una imagen válida
         if (!file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
           return callback(new BadRequestException('Solo se permiten imágenes.'), false);
         }
@@ -40,16 +37,14 @@ export class PublicacionesController {
   async crear(
     @Body() body: { titulo: string; descripcion: string; usuarioId?: string }, 
     @Request() req,
-    @UploadedFile() file: Express.Multer.File // 🌟 Multer nos inyecta el archivo acá si existe
+    @UploadedFile() file: Express.Multer.File 
   ) {
     console.log('====== ¡LLEGÓ UNA PETICIÓN POST A CONTROLADOR! ======', body);
 
     const userId = body.usuarioId || req.user?._id || req.user?.id;
 
-    // Si subió archivo, armamos la URL pública; si no, queda vacío
     const imagenUrl = file ? `/uploads/${file.filename}` : '';
 
-    // Armamos el objeto final combinando los textos con la nueva URL de la imagen
     const nuevaPublicacionData = {
       titulo: body.titulo,
       descripcion: body.descripcion,
