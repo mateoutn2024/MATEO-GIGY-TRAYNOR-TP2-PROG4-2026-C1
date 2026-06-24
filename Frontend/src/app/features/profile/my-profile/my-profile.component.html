@@ -67,14 +67,19 @@
         <h3>Mis publicaciones en el muro</h3>
       </div>
 
-      <div class="posts-list-wrapper">
-        <div *ngFor="let item of misPublicaciones" class="mini-post-card">
-          <div class="post-content-preview">
-            <h4>{{ item.titulo }}</h4>
+<div class="posts-list-wrapper">
+        <div *ngFor="let item of misPublicaciones" class="mini-post-card" style="margin-bottom: 20px; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; background: #fff;">
+          <div class="post-content-preview" style="padding: 15px;">
+            
             <p>{{ item.descripcion }}</p>
-            <div class="post-meta-footer">
+
+            <div *ngIf="item.imagenUrl" class="post-img-wrapper" style="margin: 12px 0; text-align: center;">
+              <img [src]="'http://localhost:3000' + item.imagenUrl" alt="Imagen del post" style="max-width: 100%; max-height: 220px; object-fit: cover; border-radius: 6px; display: block; margin: 0 auto;">
+            </div>
+            
+            <div class="post-meta-footer" style="margin-top: 10px; margin-bottom: 10px; font-size: 13px; color: #777; display: flex; justify-content: space-between; align-items: center;">
               <span class="time-ago">📆 {{ item.createdAt | date:'short' }}</span>
-              <span class="stat-counter">❤️ {{ item.likes?.length || 0 }} Likes</span>
+              <span class="stat-counter" style="font-weight: bold; color: #e0245e;">❤️ {{ item.likes?.length || 0 }} Likes</span>
             </div>
           </div>
         </div>
