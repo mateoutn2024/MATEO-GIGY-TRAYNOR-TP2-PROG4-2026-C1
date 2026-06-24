@@ -1,19 +1,93 @@
-<div class="profile-container" style="max-width: 600px; margin: 0 auto; padding: 20px;">
-  <div class="profile-card" *ngIf="userProfile">
-    <div class="profile-header" style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
-      <img [src]="userProfile.avatarUrl ? 'http://localhost:3000' + userProfile.avatarUrl : 'assets/default-avatar.png'" 
-           alt="Avatar" class="avatar" style="width: 100px; height: 100px; object-fit: cover;">
-      <div>
-        <h2>{{ userProfile.firstName }} {{ userProfile.lastName }}</h2>
-        <p class="username">&#64;{{ userProfile.username }}</p>
-        <span class="badge">{{ userProfile.role | uppercase }}</span>
+<div class="perfil-dashboard" *ngIf="userProfile">
+  
+  <header class="perfil-header">
+    <div class="portada-gradient"></div>
+    <div class="header-main-content">
+      <div class="avatar-wrapper">
+        <img [src]="userProfile.avatarUrl ? 'http://localhost:3000' + userProfile.avatarUrl : 'assets/default-avatar.png'" 
+             alt="Avatar" class="avatar-img">
+      </div>
+      <div class="user-main-info">
+        <div class="name-row">
+          <h2>{{ userProfile.firstName }} {{ userProfile.lastName }}</h2>
+          <span class="verificado-icon">✓</span>
+        </div>
+        <div class="tags-row">
+          <span class="username-tag">&commat;{{ userProfile.username }}</span>
+          <span class="role-badge">{{ userProfile.role }}</span>
+        </div>
+        <div class="meta-contact">
+          <span>📧 {{ userProfile.email }}</span>
+        </div>
       </div>
     </div>
-    <div class="profile-body">
-      <p><strong>Email:</strong> {{ userProfile.email }}</p>
-      <p><strong>Fecha de nacimiento:</strong> {{ userProfile.birthDate }}</p>
-      <p><strong>Biografía:</strong></p>
-      <p class="description" style="background: #f0f0f0; padding: 10px; border-radius: 4px;">{{ userProfile.description }}</p>
+
+    <div class="perfil-stats-bar">
+      <div class="stat-item">
+        <strong>{{ misPublicaciones.length }}</strong>
+        <span>Publicaciones creadas</span>
+      </div>
     </div>
+  </header>
+
+  <div class="dashboard-grid">
+    
+    <aside class="sidebar-info">
+      <div class="card-info-block">
+        <h3>Información del Usuario</h3>
+        
+        <div class="info-meta-item" *ngIf="userProfile.birthDate">
+          <span class="icon">📅</span>
+          <div class="meta-text">
+            <small>Fecha de Nacimiento </small>
+            <strong>{{ userProfile.birthDate | date:'longDate' }}</strong>
+          </div>
+        </div>
+
+        <div class="info-meta-item">
+          <span class="icon">🔑</span>
+          <div class="meta-text">
+            <small>Rol de Sistema </small>
+            <strong>{{ userProfile.role }}</strong>
+          </div>
+        </div>
+
+        <div class="info-meta-item" *ngIf="userProfile.createdAt">
+          <span class="icon">🚀</span>
+          <div class="meta-text">
+            <small>Miembro desde </small>
+            <strong>{{ userProfile.createdAt | date:'mediumDate' }}</strong>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="feed-publicaciones">
+      <div class="feed-header">
+        <h3>Mis publicaciones en el muro</h3>
+      </div>
+
+      <div class="posts-list-wrapper">
+        <div *ngFor="let item of misPublicaciones" class="mini-post-card">
+          <div class="post-content-preview">
+            <h4>{{ item.titulo }}</h4>
+            <p>{{ item.descripcion }}</p>
+            <div class="post-meta-footer">
+              <span class="time-ago">📆 {{ item.createdAt | date:'short' }}</span>
+              <span class="stat-counter">❤️ {{ item.likes?.length || 0 }} Likes</span>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="misPublicaciones.length === 0" class="mini-post-card-vacia">
+          <p>Todavía no registrás publicaciones en el sistema con este usuario.</p>
+        </div>
+      </div>
+    </main>
+
   </div>
+</div>
+
+<div class="perfil-vacio" *ngIf="!userProfile">
+  <p>No se encontraron datos de perfil activos. Por favor, iniciá sesión de nuevo.</p>
 </div>
