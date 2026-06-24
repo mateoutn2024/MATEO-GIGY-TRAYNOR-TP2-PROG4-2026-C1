@@ -83,7 +83,6 @@ export class PublicacionesService {
 async agregarLike(pubId: string, usrId: string) {
     if (!usrId) throw new BadRequestException('El ID de usuario es requerido.');
 
-    // 🌟 Usamos findByIdAndUpdate con $addToSet para que NUNCA se duplique tu ID
     const pub = await this.publicacionModel.findByIdAndUpdate(
       pubId,
       { $addToSet: { likes: new Types.ObjectId(usrId) } },
@@ -97,7 +96,6 @@ async agregarLike(pubId: string, usrId: string) {
   async removerLike(pubId: string, usrId: string) {
     if (!usrId) throw new BadRequestException('El ID de usuario es requerido.');
 
-    // 🌟 Usamos findByIdAndUpdate con $pull para remover TODAS las instancias de ese ID de un saque
     const pub = await this.publicacionModel.findByIdAndUpdate(
       pubId,
       { $pull: { likes: new Types.ObjectId(usrId) } },
