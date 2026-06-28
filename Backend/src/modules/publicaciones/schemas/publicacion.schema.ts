@@ -23,3 +23,11 @@ export class Publicacion extends Document {
 }
 
 export const PublicacionSchema = SchemaFactory.createForClass(Publicacion);
+
+export interface Comentario {
+  _id: string;
+  usuarioId: any;
+  mensaje: string;
+  modificado: boolean;
+  createdAt: Date;
+}

@@ -99,4 +99,30 @@ export class PublicacionesController {
     console.log('====== PETICIÓN DE QUITAR LIKE ======');
     return this.publicacionesService.removerLike(pubId, usuarioId);
   }
+
+  @Post(':id/comentarios')
+  async agregarComentario(
+    @Param('id') pubId: string,
+    @Body() body: { mensaje: string; usuarioId: string }
+  ) {
+    return this.publicacionesService.agregarComentario(pubId, body.mensaje, body.usuarioId);
+  }
+
+  @Put(':id/comentarios/:comentarioId')
+  async modificarComentario(
+    @Param('id') pubId: string,
+    @Param('comentarioId') comentarioId: string,
+    @Body() body: { mensaje: string }
+  ) {
+    return this.publicacionesService.modificarComentario(pubId, comentarioId, body.mensaje);
+  }
+
+  @Get(':id/comentarios')
+  async obtenerComentarios(
+    @Param('id') pubId: string,
+    @Query('limit') limit: string = '5',
+    @Query('offset') offset: string = '0'
+  ) {
+    return this.publicacionesService.obtenerComentariosPaginados(pubId, parseInt(limit, 10), parseInt(offset, 10));
+  }
 }

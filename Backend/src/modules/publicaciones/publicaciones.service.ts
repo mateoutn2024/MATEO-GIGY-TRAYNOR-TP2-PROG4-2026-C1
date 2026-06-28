@@ -104,4 +104,56 @@ async agregarLike(pubId: string, usrId: string) {
 
     if (!pub) throw new NotFoundException('No existe la publicación');
     return pub;
-  }}
+  }
+
+  async agregarComentario(pubId: string, mensaje: string, usrId: string) {
+    return this.publicacionModel.findByIdAndUpdate(
+      pubId,
+      { 
+        $push: { 
+          comentarios: {
+            _id: new Types.ObjectId(),
+            usuarioId: new Types.ObjectId(usrId),
+            mensaje,
+            modificado: false,
+            createdAt: new Date()
+          } 
+        } 
+      },
+      { new: true }
+    );
+  }
+
+  async modificarComentario(pubId: string, comentarioId: string, nuevoMensaje: string) {
+    return this.publicacionModel.updateOne(
+      { _id: new Types.ObjectId(pubId), "comentarios._id": new Types.ObjectId(comentarioId) },
+      { 
+        $set: { 
+          "comentarios.$.mensaje": nuevoMensaje,
+          "comentarios.$.modificado": true 
+        } 
+      }
+    );
+  }
+
+  async obtenerComentariosPaginados(pubId: string, limit: number, offset: number) {
+    const resultado = await this.publicacionModel.aggregate([
+      { $match: { _id: new Types.ObjectId(pubId) } },
+      { $unwind: '$comentarios' },
+      { $sort: { 'comentarios.createdAt': -1 } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'comentarios.usuarioId',
+          foreignField: '_id',
+          as: 'comentarios.usuario'
+        }
+      },
+      { $unwind: { path: '$comentarios.usuario', preserveNullAndEmptyArrays: true } },
+      { $skip: offset },
+      { $limit: limit },
+      { $group: { _id: '$_id', comentarios: { $push: '$comentarios' } } }
+    ]);
+    return resultado[0]?.comentarios || [];
+  }
+}
