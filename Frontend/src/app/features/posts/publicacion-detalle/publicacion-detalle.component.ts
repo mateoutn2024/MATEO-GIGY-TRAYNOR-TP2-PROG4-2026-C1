@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PublicacionesService } from '../../../core/services/publicaciones.service';
 import { CensurarPalabrasPipe } from '../../../shared/pipes/censurar-palabras.pipe';
@@ -9,7 +9,7 @@ import { AutofocusInputDirective } from '../../../shared/directives/autofocus-in
 @Component({
   selector: 'app-publicacion-detalle',
   standalone: true,
-  imports: [CommonModule, FormsModule, DatePipe, CensurarPalabrasPipe, AutofocusInputDirective],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, CensurarPalabrasPipe, AutofocusInputDirective],
   templateUrl: './publicacion-detalle.component.html',
   styleUrls: ['./publicacion-detalle.component.scss']
 })
