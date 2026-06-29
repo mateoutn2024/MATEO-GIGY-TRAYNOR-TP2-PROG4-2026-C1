@@ -29,10 +29,12 @@
   </div>
 
   <div class="listado-posts">
+    
     <div *ngFor="let pub of publicaciones" class="card-publicacion">
+      
       <div class="pub-header">
         <div class="user-info">
-          <h4>{{ pub.usuario?.firstName }} {{ pub.usuario?.lastName }}</h4>
+          <h4>{{ pub.usuarioId?.firstName }} {{ pub.usuarioId?.lastName }}</h4>
           <small>{{ pub.createdAt | date:'short' }}</small>
         </div>
         <button *ngIf="esDuenio(pub.usuarioId)" class="btn-eliminar" (click)="eliminar(pub._id)">Eliminar</button>
@@ -46,22 +48,31 @@
       </div>
 
       <div class="pub-footer">
+        <div class="actions-row">
           <button class="btn-like" (click)="manejarLike(pub)">
             ❤️ {{ pub.likes?.length || 0 }} Likes
           </button>
+          <button class="btn-ver-mas" (click)="verDetalle(pub._id)">
+            💬 Ver / Comentar
+          </button>
+        </div>
 
-          <div *ngIf="pub.comentarios && pub.comentarios.length > 0" class="seccion-comentarios" style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee; text-align: left;">
-            <h5 style="margin-bottom: 8px; color: #555;">💬 Comentarios:</h5>
-            <div *ngFor="let com of pub.comentarios" style="background: #f9f9f9; padding: 6px 10px; border-radius: 6px; margin-bottom: 6px; font-size: 13px;">
-              <strong style="color: #0056b3;">{{ com.autor }}:</strong> <span>{{ com.texto }}</span>
-            </div>
+        <div class="comentarios-preview" *ngIf="pub.comentarios?.length > 0">
+          <p>Comentarios recientes:</p>
+          <div *ngFor="let com of pub.comentarios?.slice(-2)" class="comment-item">
+            <span><strong>{{ com.usuarioId?.firstName || 'Usuario' }}:</strong> {{ com.mensaje }}</span>
           </div>
-        </div>  
+          <div *ngIf="pub.comentarios?.length > 2" class="more-comments">
+            ...y otros {{ pub.comentarios.length - 2 }} comentarios.
+          </div>
+        </div>
       </div>
-
+    </div> 
+    </div> 
   <div *ngIf="publicaciones.length === 0" class="no-posts">
     <p>No hay publicaciones activas en el muro. ¡Crea una arriba para testear!</p>
   </div>
 
   <button *ngIf="publicaciones.length > 0" (click)="cargarMas()" class="btn-cargar-mas">Cargar más</button>
+
 </div>

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable,ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Publicacion } from './schemas/publicacion.schema';
@@ -28,39 +28,42 @@ export class PublicacionesService {
       }
     }
 
+  async eliminarPublicacion(idPublicacion: string, idUsuarioLogueado: string, rolUsuario: string) {
+      const publicacion = await this.publicacionModel.findById(idPublicacion);
+      
+      if (!publicacion) {
+        throw new NotFoundException('La publicación no existe');
+      }
+
+      const idCreador = publicacion.usuarioId ? publicacion.usuarioId.toString() : 'vacio';
+      const idLogueado = idUsuarioLogueado ? idUsuarioLogueado.toString() : 'desconocido';
+
+      const esAdmin = rolUsuario === 'admin' || rolUsuario === 'administrador';
+
+      if (idCreador !== idLogueado && !esAdmin) {
+        throw new ForbiddenException(`Sin permisos. Dueño: ${idCreador} | Vos: ${idLogueado}`);
+      }
+
+      return await this.publicacionModel.findByIdAndDelete(idPublicacion);
+    }
+
   async listar(orden: 'fecha' | 'likes', usuarioId?: string, limit: number = 10, offset: number = 0) {
-    const query: any = { activo: true };
-    if (usuarioId) {
-      query.usuarioId = new Types.ObjectId(usuarioId);
+    try {
+      const query: any = { activo: true };
+      if (usuarioId) query.usuarioId = new Types.ObjectId(usuarioId);
+
+      const resultados = await this.publicacionModel.find(query)
+        .sort(orden === 'likes' ? { likesCount: -1 } : { createdAt: -1 })
+        .skip(Number(offset))
+        .limit(Number(limit))
+        .populate('usuarioId', 'firstName lastName') 
+        .exec();
+
+      return resultados;
+    } catch (error) {
+      console.error("ERROR CRÍTICO EN LISTAR:", error);
+      throw error;
     }
-
-    let sortOption: any = { createdAt: -1 };
-    if (orden === 'likes') {
-      sortOption = { likesCount: -1, createdAt: -1 };
-    }
-
-    const resultados = await this.publicacionModel.aggregate([
-      { $match: query },
-      { $addFields: { likesCount: { $size: '$likes' } } },
-      { $sort: sortOption },
-      { $skip: offset },
-      { $limit: limit },
-{
-        $lookup: {
-          from: 'users',
-          localField: 'usuarioId',
-          foreignField: '_id',
-          as: 'usuario'
-        }
-      },
-      { 
-        $unwind: { 
-          path: '$usuario', 
-          preserveNullAndEmptyArrays: true 
-        } 
-      }    ]);
-
-    return resultados;
   }
 
   async verificarDuenio(pubId: string, usrId: string): Promise<boolean> {
@@ -104,4 +107,49 @@ async agregarLike(pubId: string, usrId: string) {
 
     if (!pub) throw new NotFoundException('No existe la publicación');
     return pub;
-  }}
+  }
+
+  async agregarComentario(pubId: string, mensaje: string, usrId: string) {
+    return this.publicacionModel.findByIdAndUpdate(
+      pubId,
+      { 
+        $push: { 
+          comentarios: {
+            _id: new Types.ObjectId(),
+            usuarioId: new Types.ObjectId(usrId),
+            mensaje,
+            modificado: false,
+            createdAt: new Date()
+          } 
+        } 
+      },
+      { returnDocument: 'after' }
+    );
+  }
+
+  async modificarComentario(pubId: string, comentarioId: string, nuevoMensaje: string) {
+    return this.publicacionModel.updateOne(
+      { _id: new Types.ObjectId(pubId), "comentarios._id": new Types.ObjectId(comentarioId) },
+      { 
+        $set: { 
+          "comentarios.$.mensaje": nuevoMensaje,
+          "comentarios.$.modificado": true 
+        } 
+      }
+    );
+  }
+
+  async obtenerComentariosPaginados(pubId: string, limit: number, offset: number) {
+    const pub = await this.publicacionModel.findById(pubId)
+      .populate('comentarios.usuarioId') 
+      .exec();
+
+    if (!pub || !pub.comentarios) return [];
+
+    const comentariosOrdenados = pub.comentarios.sort((a: any, b: any) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+
+    return comentariosOrdenados.slice(offset, offset + limit);
+  }
+}

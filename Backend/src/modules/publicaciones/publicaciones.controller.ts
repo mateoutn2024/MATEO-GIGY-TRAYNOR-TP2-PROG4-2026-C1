@@ -1,5 +1,5 @@
 import { 
-  Controller, Get, Post, Delete, Body, Param, Query, 
+  Controller, Get, Post, Delete, Body, Param, Put, Query,Headers, 
   UseGuards, Request, ForbiddenException, HttpCode, HttpStatus,
   UseInterceptors, UploadedFile, BadRequestException 
 } from '@nestjs/common';
@@ -66,22 +66,40 @@ export class PublicacionesController {
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
   async eliminar(
     @Param('id') id: string, 
-    @Query('usuarioId') usuarioId: string, 
-    @Request() req
+    @Headers('authorization') authHeader: string
   ) {
-    const userIdLogueado = usuarioId || req.user?._id || req.user?.id;
-    
-    const esDuenio = await this.publicacionesService.verificarDuenio(id, userIdLogueado);
+    try {
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        throw new ForbiddenException('No hay token o el formato es incorrecto');
+      }
 
-    if (!esDuenio) {
-      throw new ForbiddenException('No tienes permisos.');
-    }
-    
-    return this.publicacionesService.bajaLogica(id);
-  } 
+      const token = authHeader.split(' ')[1];
+      if (!token || token === 'null' || token === 'undefined') {
+        throw new ForbiddenException('El token viaja vacío desde el frontend');
+      }
+
+      const partesToken = token.split('.');
+      if (partesToken.length !== 3) {
+        throw new ForbiddenException('El token provisto no es un JWT válido');
+      }
+
+      const payloadBuffer = Buffer.from(partesToken[1], 'base64');
+      const payload = JSON.parse(payloadBuffer.toString('utf8'));
+
+      const userId = payload.sub || payload._id || payload.id;
+      const userRole = payload.role;
+
+      return await this.publicacionesService.eliminarPublicacion(id, userId, userRole);
+
+    } catch (error) {
+          if (error instanceof ForbiddenException) throw error;
+          
+          const mensajeError = (error as any).message || 'Error desconocido';
+          throw new BadRequestException(`NestJS no pudo procesar la eliminación: ${mensajeError}`);
+        }
+  }
 
   @Post(':id/like')
   async darLike(
@@ -99,4 +117,32 @@ export class PublicacionesController {
     console.log('====== PETICIÓN DE QUITAR LIKE ======');
     return this.publicacionesService.removerLike(pubId, usuarioId);
   }
+
+  @Post(':id/comentarios')
+  async agregarComentario(
+    @Param('id') pubId: string,
+    @Body() body: { mensaje: string; usuarioId: string }
+  ) {
+    return this.publicacionesService.agregarComentario(pubId, body.mensaje, body.usuarioId);
+  }
+
+  @Put(':id/comentarios/:comentarioId')
+  async modificarComentario(
+    @Param('id') pubId: string,
+    @Param('comentarioId') comentarioId: string,
+    @Body() body: { mensaje: string }
+  ) {
+    return this.publicacionesService.modificarComentario(pubId, comentarioId, body.mensaje);
+  }
+
+  @Get(':id/comentarios')
+  async obtenerComentarios(
+    @Param('id') pubId: string,
+    @Query('limit') limit: string = '5',
+    @Query('offset') offset: string = '0'
+  ) {
+    return this.publicacionesService.obtenerComentariosPaginados(pubId, parseInt(limit, 10), parseInt(offset, 10));
+  }
+
+
 }
