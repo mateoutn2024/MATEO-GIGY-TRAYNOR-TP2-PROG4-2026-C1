@@ -29,26 +29,35 @@ export class LoginComponent {
     });
   }
 
-onSubmit(): void {
-    if (this.loginForm.valid) {
-      this.authService.login(this.loginForm.value).subscribe({
-        next: (response: any) => {
-          console.log('Respuesta del Backend en el login:', response);
+  onSubmit(): void {
+      if (this.loginForm.valid) {
+        this.authService.login(this.loginForm.value).subscribe({
+          next: (response: any) => {
+            console.log('Respuesta del Backend en el login:', response);
 
-          if (response.access_token) {
-            localStorage.setItem('token', response.access_token);
+            if (response.access_token) {
+              localStorage.setItem('token', response.access_token);
+            }
+
+            const usuarioReal = response.data ? response.data : response;
+            localStorage.setItem('user', JSON.stringify(usuarioReal));
+
+            this.sessionService.iniciarContadorSesion();
+            this.router.navigate(['/publicaciones']);
+          },
+          error: (err: any) => {
+            const status = err.status;
+            const msgBackend = err.error?.message || err.error || '';
+
+            if (status === 401 || JSON.stringify(msgBackend).toLowerCase().includes('inactiv')) {
+              this.errorMessage = '⚠️ Tu cuenta se encuentra inhabilitada. Contactá a un Administrador.';
+            } else {
+              this.errorMessage = typeof msgBackend === 'string' ? msgBackend : 'Credenciales inválidas';
+            }
+
+            console.error('Login rechazado:', this.errorMessage);
           }
-
-          const usuarioReal = response.data ? response.data : response;
-          localStorage.setItem('user', JSON.stringify(usuarioReal));
-
-          this.sessionService.iniciarContadorSesion();
-          this.router.navigate(['/publicaciones']);
-        },
-        error: (err: any) => {
-          this.errorMessage = 'Credenciales inválidas';
-        }
-      });
+        });
+      }
     }
-  }
 }

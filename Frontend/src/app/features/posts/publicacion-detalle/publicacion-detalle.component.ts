@@ -1,13 +1,15 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PublicacionesService } from '../../../core/services/publicaciones.service';
+import { CensurarPalabrasPipe } from '../../../shared/pipes/censurar-palabras.pipe';
+import { AutofocusInputDirective } from '../../../shared/directives/autofocus-input.directive';
 
 @Component({
   selector: 'app-publicacion-detalle',
   standalone: true,
-  imports: [CommonModule, FormsModule, DatePipe],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, CensurarPalabrasPipe, AutofocusInputDirective],
   templateUrl: './publicacion-detalle.component.html',
   styleUrls: ['./publicacion-detalle.component.scss']
 })
@@ -21,6 +23,7 @@ export class PublicacionDetalleComponent implements OnInit {
   bloquearCargarMas = false;
   
   usuarioLogueadoId: string = '';
+  esAdmin: boolean = false;
   comentarioEditandoId: string | null = null;
   mensajeEditado: string = '';
 
@@ -35,8 +38,10 @@ export class PublicacionDetalleComponent implements OnInit {
     if (savedUser) {
       const parsed = JSON.parse(savedUser);
       this.usuarioLogueadoId = parsed._id || parsed.data?._id || '';
+      const rol = parsed.role || parsed.data?.role;
+      this.esAdmin = (rol === 'administrador');
     }
-    
+
     const idPublicacion = this.route.snapshot.paramMap.get('id');
     if (idPublicacion) {
       this.cargarPublicacionBase(idPublicacion);
@@ -53,9 +58,7 @@ export class PublicacionDetalleComponent implements OnInit {
 
   cargarComentariosMuro(id: string, append: boolean): void {
     this.pubService.obtenerComentariosPaginados(id, this.limit, this.offset).subscribe((res: any) => {
-      
       const comentariosRecibidos = res.data ? (res.data.comentarios || res.data) : (res.comentarios || res);
-
       const nuevosComentarios = Array.isArray(comentariosRecibidos) ? comentariosRecibidos : [];
       
       if (nuevosComentarios.length < this.limit) {
@@ -63,45 +66,51 @@ export class PublicacionDetalleComponent implements OnInit {
       }
       
       this.comentarios = append ? [...this.comentarios, ...nuevosComentarios] : nuevosComentarios;
-      console.log("Array final de comentarios corregido:", this.comentarios);
     });
   }
+
   cargarMas(): void {
     this.offset += this.limit;
     this.cargarComentariosMuro(this.publicacion._id, true);
   }
 
   agregarComentario(): void {
-      if (!this.nuevoComentario.trim()) return;
+    if (!this.nuevoComentario.trim()) return;
 
-      const savedUser = localStorage.getItem('user');
-      const userId = savedUser ? JSON.parse(savedUser)._id : null;
+    const savedUser = localStorage.getItem('user');
+    const userId = savedUser ? JSON.parse(savedUser)._id : null;
 
-      this.pubService.enviarComentario(this.publicacion._id, this.nuevoComentario, userId).subscribe({
-        next: (res: any) => {
-          console.log('Respuesta del servidor al comentar:', res);
+    this.pubService.enviarComentario(this.publicacion._id, this.nuevoComentario, userId).subscribe({
+      next: () => {
+        this.offset = 0;
+        this.cargarComentariosMuro(this.publicacion._id, false);
+        this.nuevoComentario = '';
+      },
+      error: (err: any) => {
+        console.error('Error al comentar:', err);
+        alert('No se pudo guardar el comentario');
+      }
+    });
+  }
 
-          if (res && res.comentarios && Array.isArray(res.comentarios)) {
-            const ultimo = res.comentarios[res.comentarios.length - 1];
-            this.comentarios.unshift(ultimo);
-          } 
-          else if (res && res.mensaje) {
-            this.comentarios.unshift(res);
-          }
-
-          this.nuevoComentario = '';
+  darDeBajaPublicacionAdmin(): void {
+    if (confirm('⚠️ ¿Estás seguro de dar de baja esta publicación? Dejará de estar disponible para todos los usuarios.')) {
+      this.pubService.darDeBajaAdmin(this.publicacion._id).subscribe({
+        next: () => {
+          alert('Publicación dada de baja exitosamente.');
+          this.router.navigate(['/publicaciones']);
         },
-        error: (err) => {
-          console.error('Error al comentar:', err);
-          alert('No se pudo guardar el comentario');
+        error: (err: any) => {
+          console.error('Error al dar de baja:', err);
+          alert('No se pudo dar de baja la publicación.');
         }
       });
     }
+  }
 
   activarModoEdicion(com: any): void {
     this.comentarioEditandoId = com._id;
     this.mensajeEditado = com.mensaje;
-    console.log("Modo edición activado para:", this.comentarioEditandoId);
   }
 
   guardarComentarioEditado(comentarioId: string): void {
@@ -109,17 +118,16 @@ export class PublicacionDetalleComponent implements OnInit {
 
     this.pubService.editarComentario(this.publicacion._id, comentarioId, this.mensajeEditado)
       .subscribe({
-        next: (res) => {
+        next: () => {
           const index = this.comentarios.findIndex(c => c._id === comentarioId);
           if (index !== -1) {
             this.comentarios[index].mensaje = this.mensajeEditado;
             this.comentarios[index].modificado = true;
           }
-          
           this.comentarioEditandoId = null;
           this.mensajeEditado = '';
         },
-        error: (err) => console.error("Error al editar:", err)
+        error: (err: any) => console.error("Error al editar:", err)
       });
   }
 

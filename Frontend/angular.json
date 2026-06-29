@@ -25,7 +25,9 @@
             "inlineStyleLanguage": "scss",
             "assets": ["src/assets", "src/favicon.ico"],
             "styles": ["src/styles.scss"],
-            "scripts": []
+            "scripts": [],
+            "serviceWorker": true,
+            "ngswConfigPath": "ngsw-config.json"
           },
           "configurations": {
             "production": {

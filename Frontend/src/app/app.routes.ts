@@ -5,6 +5,9 @@ import { PublicationsComponent } from './features/posts/publications/publication
 import {PublicacionDetalleComponent} from './features/posts/publicacion-detalle/publicacion-detalle.component';
 import { MyProfileComponent } from './features/profile/my-profile/my-profile.component';
 import { LoadingComponent } from './features/loading/loading.component';
+import { DashboardUsuariosComponent } from './features/dashboard/usuarios/dashboard-usuarios.component';
+import { AdminGuard } from './core/guard/admin.guard';
+import { DashboardEstadisticasComponent } from './features/dashboard/estadisticas/dashboard-estadisticas.component';
 
 export const routes: Routes = [
   { path: '', component: LoadingComponent, pathMatch: 'full' },
@@ -13,5 +16,7 @@ export const routes: Routes = [
   { path: 'publications', component: PublicationsComponent }, 
   { path: 'publicaciones/:id', component: PublicacionDetalleComponent },
   { path: 'profile', component: MyProfileComponent },
+  { path: 'dashboard/usuarios', component: DashboardUsuariosComponent, canActivate: [AdminGuard] },
+  { path: 'dashboard/estadisticas', component: DashboardEstadisticasComponent, canActivate: [AdminGuard] },
   { path: '**', redirectTo: '' }
 ];

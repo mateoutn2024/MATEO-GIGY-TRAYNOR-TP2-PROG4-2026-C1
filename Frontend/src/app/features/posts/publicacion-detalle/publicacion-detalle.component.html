@@ -3,8 +3,18 @@
   <button class="btn-volver" (click)="volver()">← Volver al muro</button>
 
   <div class="card-grande">
-    <div class="card-body">
-      <h2 class="card-title">{{ publicacion.titulo }}</h2>
+    <div class="card-body" style="position: relative;">
+      
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; margin-bottom: 10px;">
+        <h2 class="card-title" style="margin: 0;">{{ publicacion.titulo }}</h2>
+        
+        <button *ngIf="esAdmin" 
+                (click)="darDeBajaPublicacionAdmin()" 
+                style="background-color: #dc3545; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; white-space: nowrap;">
+          🗑️ Dar de baja (Admin)
+        </button>
+      </div>
+
       <p class="card-text">{{ publicacion.descripcion }}</p>
     </div>
     <div *ngIf="publicacion.imagenUrl" class="card-media">
@@ -16,11 +26,11 @@
     <h3 class="titulo-comentarios">💬 Comentarios</h3>
 
     <div class="box-escribir">
-      <input type="text" [(ngModel)]="nuevoComentario" placeholder="Escribí un comentario..." class="input-comentario">
+      <input type="text" [(ngModel)]="nuevoComentario" placeholder="Escribí un comentario..." class="input-comentario" appAutofocusInput>
       <button class="btn-comentar" (click)="agregarComentario()">Comentar</button>
     </div>
 
-    <div class="listado-hilos"> 
+    <div class="listado-hilos">
       <div *ngFor="let com of comentarios" class="comentario-item">
         
         <div class="comentario-header">
@@ -29,10 +39,10 @@
         </div>
 
         <div *ngIf="comentarioEditandoId !== com._id" class="comentario-body">
-          <p class="comentario-texto">{{ com.mensaje }}</p>
+          <p class="comentario-texto">{{ com.mensaje | censurarPalabras }}</p>
           <span *ngIf="com.modificado" class="comentario-editado">• Editado</span>
-
-          <button *ngIf="(com.usuarioId?._id || com.usuarioId) == usuarioLogueadoId" 
+          
+          <button *ngIf="(com.usuarioId && (com.usuarioId == usuarioLogueadoId || com.usuarioId._id == usuarioLogueadoId || com.usuario?._id == usuarioLogueadoId))" 
                   class="btn-editar" 
                   (click)="activarModoEdicion(com)">
             Editar
@@ -43,7 +53,8 @@
           <input type="text" 
                 [(ngModel)]="mensajeEditado" 
                 class="input-edicion"
-                (keyup.enter)="guardarComentarioEditado(com._id)"> <button class="btn-guardar" (click)="guardarComentarioEditado(com._id)">Guardar</button>
+                (keyup.enter)="guardarComentarioEditado(com._id)"> 
+          <button class="btn-guardar" (click)="guardarComentarioEditado(com._id)">Guardar</button>
           <button class="btn-cancelar" (click)="comentarioEditandoId = null">Cancelar</button>
         </div>
       </div>

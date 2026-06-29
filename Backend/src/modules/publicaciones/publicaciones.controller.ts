@@ -8,6 +8,7 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { PublicacionesService } from './publicaciones.service';
 import { AuthGuard } from '../auth/auth.guard';
+import { AdminGuard } from '../auth/admin.guard';
 
 @Controller('publicaciones')
 @UseGuards(AuthGuard)
@@ -144,5 +145,10 @@ export class PublicacionesController {
     return this.publicacionesService.obtenerComentariosPaginados(pubId, parseInt(limit, 10), parseInt(offset, 10));
   }
 
+  @Delete('admin/baja/:id')
+  @UseGuards(AuthGuard, AdminGuard)
+  async bajaLogicaAdmin(@Param('id') id: string) {
+    return this.publicacionesService.cambiarEstadoPublicacion(id, false);
+  }
 
 }
