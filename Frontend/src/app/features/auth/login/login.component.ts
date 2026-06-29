@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { SessionService } from '../../../core/services/session.service';
 
 @Component({
   selector: 'app-login',
@@ -19,6 +20,7 @@ export class LoginComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
+    private sessionService: SessionService,
     private router: Router
   ) {
     this.loginForm = this.fb.group({
@@ -28,19 +30,25 @@ export class LoginComponent {
   }
 
 onSubmit(): void {
-  if (this.loginForm.valid) {
-    this.authService.login(this.loginForm.value).subscribe({
-      next: (response) => {
-        console.log('Respuesta del Backend en el login:', response);
-        
-        localStorage.setItem('user', JSON.stringify(response));
-        
-        this.router.navigate(['/profile']);
-      },
-      error: (err) => {
-        this.errorMessage = 'Credenciales inválidas';
-      }
-    });
+    if (this.loginForm.valid) {
+      this.authService.login(this.loginForm.value).subscribe({
+        next: (response: any) => {
+          console.log('Respuesta del Backend en el login:', response);
+
+          if (response.access_token) {
+            localStorage.setItem('token', response.access_token);
+          }
+
+          const usuarioReal = response.data ? response.data : response;
+          localStorage.setItem('user', JSON.stringify(usuarioReal));
+
+          this.sessionService.iniciarContadorSesion();
+          this.router.navigate(['/publicaciones']);
+        },
+        error: (err: any) => {
+          this.errorMessage = 'Credenciales inválidas';
+        }
+      });
+    }
   }
-}
 }

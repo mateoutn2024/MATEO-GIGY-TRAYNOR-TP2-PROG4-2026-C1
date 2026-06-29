@@ -100,7 +100,7 @@ onSubmit(): void {
     const passwordReg = this.registerForm.value.password;
 
     this.authService.register(formData).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         this.successMessage = '¡Cuenta creada! Sincronizando credenciales...';
 
         setTimeout(() => {
@@ -119,7 +119,7 @@ onSubmit(): void {
               
               window.location.href = '/publications';
             },
-            error: (loginErr) => {
+            error: (loginErr: any) => {
               console.error('El backend rechazó el login automático:', loginErr);
               this.errorMessage = 'Usuario creado, pero falló el inicio automático. Por favor inicia sesión manualmente.';
               setTimeout(() => {
@@ -129,7 +129,7 @@ onSubmit(): void {
           });
         }, 500);
       },
-      error: (err) => {
+      error: (err: any) => {
         this.errorMessage = err.error?.error || 'Ocurrió un error al procesar el registro.';
       }
     });

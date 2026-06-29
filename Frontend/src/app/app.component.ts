@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { SessionService } from './core/services/session.service';
 import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
+import { AuthService } from './core/services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -20,4 +22,12 @@ import { NavbarComponent } from './shared/components/navbar/navbar.component';
     }
   `]
 })
-export class AppComponent {}
+export class AppComponent implements OnInit {
+  constructor(private sessionService: SessionService, private authService: AuthService) {}
+
+  ngOnInit() {
+    if (localStorage.getItem('user')) {
+      this.sessionService.iniciarContadorSesion();
+    }
+  }
+}

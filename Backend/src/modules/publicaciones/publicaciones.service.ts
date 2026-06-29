@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable,ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Publicacion } from './schemas/publicacion.schema';
@@ -28,39 +28,42 @@ export class PublicacionesService {
       }
     }
 
+  async eliminarPublicacion(idPublicacion: string, idUsuarioLogueado: string, rolUsuario: string) {
+      const publicacion = await this.publicacionModel.findById(idPublicacion);
+      
+      if (!publicacion) {
+        throw new NotFoundException('La publicación no existe');
+      }
+
+      const idCreador = publicacion.usuarioId ? publicacion.usuarioId.toString() : 'vacio';
+      const idLogueado = idUsuarioLogueado ? idUsuarioLogueado.toString() : 'desconocido';
+
+      const esAdmin = rolUsuario === 'admin' || rolUsuario === 'administrador';
+
+      if (idCreador !== idLogueado && !esAdmin) {
+        throw new ForbiddenException(`Sin permisos. Dueño: ${idCreador} | Vos: ${idLogueado}`);
+      }
+
+      return await this.publicacionModel.findByIdAndDelete(idPublicacion);
+    }
+
   async listar(orden: 'fecha' | 'likes', usuarioId?: string, limit: number = 10, offset: number = 0) {
-    const query: any = { activo: true };
-    if (usuarioId) {
-      query.usuarioId = new Types.ObjectId(usuarioId);
+    try {
+      const query: any = { activo: true };
+      if (usuarioId) query.usuarioId = new Types.ObjectId(usuarioId);
+
+      const resultados = await this.publicacionModel.find(query)
+        .sort(orden === 'likes' ? { likesCount: -1 } : { createdAt: -1 })
+        .skip(Number(offset))
+        .limit(Number(limit))
+        .populate('usuarioId', 'firstName lastName') 
+        .exec();
+
+      return resultados;
+    } catch (error) {
+      console.error("ERROR CRÍTICO EN LISTAR:", error);
+      throw error;
     }
-
-    let sortOption: any = { createdAt: -1 };
-    if (orden === 'likes') {
-      sortOption = { likesCount: -1, createdAt: -1 };
-    }
-
-    const resultados = await this.publicacionModel.aggregate([
-      { $match: query },
-      { $addFields: { likesCount: { $size: '$likes' } } },
-      { $sort: sortOption },
-      { $skip: offset },
-      { $limit: limit },
-{
-        $lookup: {
-          from: 'users',
-          localField: 'usuarioId',
-          foreignField: '_id',
-          as: 'usuario'
-        }
-      },
-      { 
-        $unwind: { 
-          path: '$usuario', 
-          preserveNullAndEmptyArrays: true 
-        } 
-      }    ]);
-
-    return resultados;
   }
 
   async verificarDuenio(pubId: string, usrId: string): Promise<boolean> {
@@ -120,7 +123,7 @@ async agregarLike(pubId: string, usrId: string) {
           } 
         } 
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -137,23 +140,16 @@ async agregarLike(pubId: string, usrId: string) {
   }
 
   async obtenerComentariosPaginados(pubId: string, limit: number, offset: number) {
-    const resultado = await this.publicacionModel.aggregate([
-      { $match: { _id: new Types.ObjectId(pubId) } },
-      { $unwind: '$comentarios' },
-      { $sort: { 'comentarios.createdAt': -1 } },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'comentarios.usuarioId',
-          foreignField: '_id',
-          as: 'comentarios.usuario'
-        }
-      },
-      { $unwind: { path: '$comentarios.usuario', preserveNullAndEmptyArrays: true } },
-      { $skip: offset },
-      { $limit: limit },
-      { $group: { _id: '$_id', comentarios: { $push: '$comentarios' } } }
-    ]);
-    return resultado[0]?.comentarios || [];
+    const pub = await this.publicacionModel.findById(pubId)
+      .populate('comentarios.usuarioId') 
+      .exec();
+
+    if (!pub || !pub.comentarios) return [];
+
+    const comentariosOrdenados = pub.comentarios.sort((a: any, b: any) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+
+    return comentariosOrdenados.slice(offset, offset + limit);
   }
 }

@@ -1,0 +1,53 @@
+<div class="detalle-muro-wrapper" *ngIf="publicacion">
+  
+  <button class="btn-volver" (click)="volver()">← Volver al muro</button>
+
+  <div class="card-grande">
+    <div class="card-body">
+      <h2 class="card-title">{{ publicacion.titulo }}</h2>
+      <p class="card-text">{{ publicacion.descripcion }}</p>
+    </div>
+    <div *ngIf="publicacion.imagenUrl" class="card-media">
+      <img [src]="'http://localhost:3000' + publicacion.imagenUrl" alt="Post img" class="post-img">
+    </div>
+  </div>
+
+  <div class="seccion-comentarios-muro">
+    <h3 class="titulo-comentarios">💬 Comentarios</h3>
+
+    <div class="box-escribir">
+      <input type="text" [(ngModel)]="nuevoComentario" placeholder="Escribí un comentario..." class="input-comentario">
+      <button class="btn-comentar" (click)="agregarComentario()">Comentar</button>
+    </div>
+
+    <div class="listado-hilos"> 
+      <div *ngFor="let com of comentarios" class="comentario-item">
+        
+        <div class="comentario-header">
+          <strong class="comentario-autor">{{ com.usuario?.firstName }} {{ com.usuario?.lastName }}</strong>
+          <span class="comentario-fecha">{{ com.createdAt | date:'shortTime' }}</span>
+        </div>
+
+        <div *ngIf="comentarioEditandoId !== com._id" class="comentario-body">
+          <p class="comentario-texto">{{ com.mensaje }}</p>
+          <span *ngIf="com.modificado" class="comentario-editado">• Editado</span>
+
+          <button *ngIf="(com.usuarioId?._id || com.usuarioId) == usuarioLogueadoId" 
+                  class="btn-editar" 
+                  (click)="activarModoEdicion(com)">
+            Editar
+          </button>
+        </div>
+
+        <div *ngIf="comentarioEditandoId == com._id" class="box-edicion">
+          <input type="text" 
+                [(ngModel)]="mensajeEditado" 
+                class="input-edicion"
+                (keyup.enter)="guardarComentarioEditado(com._id)"> <button class="btn-guardar" (click)="guardarComentarioEditado(com._id)">Guardar</button>
+          <button class="btn-cancelar" (click)="comentarioEditandoId = null">Cancelar</button>
+        </div>
+      </div>
+    </div>
+    <button *ngIf="!bloquearCargarMas && comentarios.length > 0" class="btn-cargar-mas" (click)="cargarMas()">Cargar más comentarios</button>
+  </div>
+</div>

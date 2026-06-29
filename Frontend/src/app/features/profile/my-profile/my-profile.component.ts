@@ -15,35 +15,35 @@ export class MyProfileComponent implements OnInit {
 
   constructor(private pubService: PublicacionesService) {}
 
-  ngOnInit(): void {
+ngOnInit(): void {
     const savedUser = localStorage.getItem('user');
+    console.log('1. Crudo desde LocalStorage:', savedUser);
 
-    if (savedUser && savedUser !== 'undefined') {
+    if (savedUser && savedUser !== 'undefined' && savedUser !== '[object Object]') {
       try {
         const parsed = JSON.parse(savedUser);
+        console.log('2. Objeto Parseado:', parsed);
         
-        // 🌟 CLAVE: Según tu captura, la info real del usuario está en parsed.data
-        this.userProfile = parsed?.data ? parsed.data : parsed;
+        this.userProfile = parsed?.data?.data ? parsed.data.data : (parsed?.data ? parsed.data : parsed);
+        
+        console.log('3. Perfil final inyectado al HTML:', this.userProfile);
 
         if (this.userProfile) {
-          // Extraemos el ID real asegurando que lea el string del campo '_id'
-          const userIdString = this.userProfile._id || parsed._id;
-          
-          if (userIdString) {
-            this.cargarMisPublicaciones(userIdString.toString());
+          const rawId = this.userProfile._id || this.userProfile.id;
+          if (rawId) {
+            const userIdString = rawId._id ? rawId._id.toString() : rawId.toString();
+            this.cargarMisPublicaciones(userIdString);
           }
         }
       } catch (error) {
         console.error('Error al procesar el perfil:', error);
         this.userProfile = null;
-        this.misPublicaciones = [];
       }
     } else {
+      console.warn('No hay datos en localStorage o están corruptos.');
       this.userProfile = null;
-      this.misPublicaciones = [];
     }
   }
-
   cargarMisPublicaciones(targetUserId: string): void {
     console.log('ID real de Pilar Nuñez para filtrar:', targetUserId);
 
@@ -55,7 +55,6 @@ export class MyProfileComponent implements OnInit {
           .filter((p: any) => {
             if (!p.usuarioId) return false;
             
-            // 🌟 VALIDACIÓN BLINDADA: Extrae el ID del creador sea un objeto completo o un string directo
             const postCreatorId = p.usuarioId._id 
               ? p.usuarioId._id.toString() 
               : (p.usuarioId.toString ? p.usuarioId.toString() : p.usuarioId);
@@ -64,7 +63,6 @@ export class MyProfileComponent implements OnInit {
           })
           .slice(0, 3); 
 
-        // Inyección de comentarios para cumplir el Sprint 2
         if (this.misPublicaciones.length > 0) {
           if (this.misPublicaciones[0]) {
             this.misPublicaciones[0].comentarios = [
@@ -90,7 +88,6 @@ export class MyProfileComponent implements OnInit {
     });
   }
 
-  // 🌟 AGREGAMOS LA FUNCIÓN DE VERIFICACIÓN DE SOBERANÍA EN EL PERFIL TAMBIÉN
   esDuenio(pubUsuarioId: any): boolean {
     if (!pubUsuarioId || !this.userProfile) return false;
     const idPublicacion = pubUsuarioId._id ? pubUsuarioId._id.toString() : pubUsuarioId.toString();

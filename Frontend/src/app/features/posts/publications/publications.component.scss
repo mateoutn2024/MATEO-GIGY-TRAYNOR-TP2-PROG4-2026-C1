@@ -199,3 +199,38 @@
     }
   }
 }
+
+.pub-footer {
+  display: flex;
+  flex-direction: column; 
+  gap: 15px;
+
+  .actions-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.comentarios-preview {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 12px;
+  border-left: 3px solid #cbd5e1;
+
+  p { margin: 0 0 8px 0; font-size: 0.85em; color: #64748b; font-weight: 600; }
+
+  .comment-item {
+    font-size: 0.9em;
+    margin-bottom: 6px;
+    
+    strong { color: #1e293b; margin-right: 5px; }
+  }
+
+  .more-comments {
+    font-size: 0.8em;
+    color: #94a3b8;
+    font-style: italic;
+    margin-top: 5px;
+  }
+}
