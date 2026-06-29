@@ -30,21 +30,30 @@
 
   <div class="listado-posts">
     
-    <div *ngFor="let pub of publicaciones" class="card-publicacion">
+    <div *ngFor="let pub of publicaciones" class="card-publicacion" appHoverCard>
       
       <div class="pub-header">
         <div class="user-info">
           <h4>{{ pub.usuarioId?.firstName }} {{ pub.usuarioId?.lastName }}</h4>
-          <small>{{ pub.createdAt | date:'short' }}</small>
+          <small>{{ pub.createdAt | tiempoTranscurrido }}</small>
         </div>
-        <button *ngIf="esDuenio(pub.usuarioId)" class="btn-eliminar" (click)="eliminar(pub._id)">Eliminar</button>
+        
+        <div style="display: flex; gap: 8px;">
+          <button *ngIf="esDuenio(pub.usuarioId)" class="btn-eliminar" (click)="eliminar(pub._id)">Eliminar</button>
+          
+          <button *ngIf="esAdmin && !esDuenio(pub.usuarioId)" 
+                  (click)="darDeBajaAdmin(pub._id)"
+                  style="background-color: #842029; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer;">
+            🗑️ Dar de baja (Admin)
+          </button>
+        </div>
       </div>
       
       <div class="pub-body">
         <h3>{{ pub.titulo }}</h3>
-        <p>{{ pub.descripcion }}</p>
+        <p>{{ pub.descripcion | truncarTexto:100 }}</p>
         
-        <img *ngIf="pub.imagenUrl" [src]="'http://localhost:3000' + pub.imagenUrl" class="pub-img">
+        <img *ngIf="pub.imagenUrl" [src]="'http://localhost:3000' + pub.imagenUrl" appImgFallback="/assets/error-img.png" class="pub-img">
       </div>
 
       <div class="pub-footer">
@@ -68,7 +77,8 @@
         </div>
       </div>
     </div> 
-    </div> 
+  </div> 
+
   <div *ngIf="publicaciones.length === 0" class="no-posts">
     <p>No hay publicaciones activas en el muro. ¡Crea una arriba para testear!</p>
   </div>

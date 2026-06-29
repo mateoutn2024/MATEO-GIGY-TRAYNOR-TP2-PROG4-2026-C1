@@ -36,7 +36,8 @@ export class AuthService {
       birthDate: registerDto.birthDate,
       description: registerDto.description,
       avatarUrl: avatarUrl,
-      role: registerDto.role || 'usuario'
+      role: registerDto.role || 'usuario',
+      activo: true
     });
 
     const userObj = created.toObject();
@@ -48,6 +49,10 @@ export class AuthService {
     const user = await this.usersService.findByEmailOrUsername(loginDto.identifier);
     if (!user) {
       throw new UnauthorizedException('Credenciales inválidas');
+    }
+
+    if (user.activo === false) {
+      throw new UnauthorizedException('Tu cuenta se encuentra deshabilitada. Contacta a un administrador.');
     }
 
     const isMatch = await bcrypt.compare(loginDto.password, user.password);
@@ -79,6 +84,10 @@ export class AuthService {
       const payload = this.jwtService.verify(token);
       const user = await this.usersService.findByEmailOrUsername(payload.email);
       if (!user) throw new UnauthorizedException('Usuario no encontrado');
+
+      if (user.activo === false) {
+        throw new UnauthorizedException('Usuario deshabilitado');
+      }
 
       const userObj = user.toObject();
       delete (userObj as any).password;

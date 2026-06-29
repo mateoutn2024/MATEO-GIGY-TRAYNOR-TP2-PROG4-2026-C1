@@ -152,4 +152,83 @@ async agregarLike(pubId: string, usrId: string) {
 
     return comentariosOrdenados.slice(offset, offset + limit);
   }
+  async cambiarEstadoPublicacion(id: string, estado: boolean): Promise<any> {
+    return this.publicacionModel.findByIdAndUpdate(id, { activo: estado }, { new: true }).exec();
+  }
+
+  async estadisticasPublicacionesPorUsuario(fechaInicio: string, fechaFin: string): Promise<any[]> {
+    return this.publicacionModel.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: new Date(fechaInicio), $lte: new Date(fechaFin) }
+        }
+      },
+      {
+        $group: {
+          _id: '$usuarioId',
+          totalPublicaciones: { $sum: 1 }
+        }
+      },
+      {
+        $lookup: {
+          from: 'users', 
+          localField: '_id',
+          foreignField: '_id',
+          as: 'datosUsuario'
+        }
+      },
+      {
+        $unwind: { path: '$datosUsuario', preserveNullAndEmptyArrays: true }
+      },
+      {
+        $project: {
+          _id: 1,
+          totalPublicaciones: 1,
+          nombreUsuario: {
+            $concat: [
+              { $ifNull: ['$datosUsuario.firstName', 'Usuario'] },
+              ' ',
+              { $ifNull: ['$datosUsuario.lastName', 'Desconocido'] }
+            ]
+          },
+          username: '$datosUsuario.username'
+        }
+      }
+    ]).exec();
+  }
+
+  async estadisticasComentariosTotales(fechaInicio: string, fechaFin: string): Promise<any> {
+    const resultado = await this.publicacionModel.aggregate([
+      { $unwind: '$comentarios' },
+      {
+        $match: {
+          'comentarios.createdAt': { $gte: new Date(fechaInicio), $lte: new Date(fechaFin) }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalComentarios: { $sum: 1 }
+        }
+      }
+    ]).exec();
+
+    return { total: resultado.length > 0 ? resultado[0].totalComentarios : 0 };
+  }
+
+  async estadisticasComentariosPorPublicacion(fechaInicio: string, fechaFin: string): Promise<any[]> {
+    return this.publicacionModel.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: new Date(fechaInicio), $lte: new Date(fechaFin) }
+        }
+      },
+      {
+        $project: {
+          titulo: 1,
+          totalComentarios: { $size: { $ifNull: ['$comentarios', []] } }
+        }
+      }
+    ]).exec();
+  }
 }

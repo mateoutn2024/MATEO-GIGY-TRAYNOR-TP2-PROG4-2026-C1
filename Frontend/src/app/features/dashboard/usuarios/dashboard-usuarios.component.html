@@ -1,0 +1,62 @@
+<div class="dashboard-container">
+  <h2>⚙️ Panel de Gestión de Usuarios</h2>
+
+  <div class="seccion-crear">
+    <h3>Alta de Nuevo Usuario</h3>
+    <form (ngSubmit)="registrarUsuario()">
+      <input type="text" [(ngModel)]="nuevoUsuario.firstName" name="firstName" placeholder="Nombre" required class="form-control">
+      <input type="text" [(ngModel)]="nuevoUsuario.lastName" name="lastName" placeholder="Apellido" required class="form-control">
+      <input type="email" [(ngModel)]="nuevoUsuario.email" name="email" placeholder="Correo electrónico" required class="form-control">
+      <input type="text" [(ngModel)]="nuevoUsuario.username" name="username" placeholder="Nombre de usuario" required class="form-control">
+      <input type="password" [(ngModel)]="nuevoUsuario.password" name="password" placeholder="Contraseña" required class="form-control">
+      <input type="date" [(ngModel)]="nuevoUsuario.birthDate" name="birthDate" required class="form-control">
+      <input type="text" [(ngModel)]="nuevoUsuario.description" name="description" placeholder="Descripción corta" required class="form-control">
+
+      <div class="roles-radio">
+        <strong>Rol asignado:</strong>
+        <label>
+          <input type="radio" [(ngModel)]="nuevoUsuario.role" name="role" value="usuario"> Usuario
+        </label>
+        <label>
+          <input type="radio" [(ngModel)]="nuevoUsuario.role" name="role" value="administrador"> Administrador
+        </label>
+      </div>
+
+      <button type="submit">
+        Crear Usuario
+      </button>
+    </form>
+  </div>
+
+  <hr>
+
+  <div class="seccion-listado">
+    <h3>Listado de Usuarios Registrados</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Usuario</th>
+          <th>Nombre</th>
+          <th>Email</th>
+          <th>Rol</th>
+          <th>Estado</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let u of usuarios">
+          <td><strong>{{ u.username }}</strong></td>
+          <td>{{ u.firstName }} {{ u.lastName }}</td>
+          <td>{{ u.email }}</td>
+          <td><span>{{ u.role }}</span></td>
+          <td>{{ u.activo ? '🟢 Activo' : '🔴 Deshabilitado' }}</td>
+          <td>
+            <button (click)="cambiarEstado(u)" [style.background-color]="u.activo ? '#dc3545' : '#198754'">
+              {{ u.activo ? 'Deshabilitar' : 'Habilitar' }}
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,32 @@
+<div class="stats-container">
+  <h2>📊 Panel de Estadísticas Generales</h2>
+
+  <div class="filtros-box">
+    <div class="campo">
+      <label>Fecha Inicio:</label>
+      <input type="date" [(ngModel)]="fechaInicio" class="form-control">
+    </div>
+    <div class="campo">
+      <label>Fecha Fin:</label>
+      <input type="date" [(ngModel)]="fechaFin" class="form-control">
+    </div>
+    <button (click)="generarGraficos()" class="btn-filtrar">Generar Gráficos</button>
+  </div>
+
+  <div class="grid-graficos">
+    <div class="card-grafico">
+      <h3>Publicaciones por Usuario (Barras)</h3>
+      <canvas id="canvasPubsUsuario"></canvas>
+    </div>
+
+    <div class="card-grafico">
+      <h3>Volumen de Comentarios (Torta)</h3>
+      <canvas id="canvasComentariosTotales"></canvas>
+    </div>
+
+    <div class="card-grafico card-ancha">
+      <h3>Interacción: Comentarios por Publicación (Líneas)</h3>
+      <canvas id="canvasComentariosPorPub"></canvas>
+    </div>
+  </div>
+</div>

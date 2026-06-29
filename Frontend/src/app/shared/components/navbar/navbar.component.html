@@ -4,6 +4,8 @@
     <div class="nav-links">
       <a routerLink="/publications" routerLinkActive="active">Publicaciones</a>
       <a routerLink="/profile" routerLinkActive="active">Mi Perfil</a>
+      <a routerLink="/dashboard/usuarios" *ngIf="esAdmin" class="nav-link">⚙️ Usuarios</a>
+      <a routerLink="/dashboard/estadisticas" *ngIf="esAdmin" class="nav-link">📊 Estadísticas</a>
       <a routerLink="/login" routerLinkActive="active">Login</a>
       <a routerLink="/register" routerLinkActive="active">Registro</a>
       <button (click)="logout()" class="btn-logout">Salir</button>
