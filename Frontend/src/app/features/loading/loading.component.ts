@@ -38,7 +38,6 @@ export class LoadingComponent implements OnInit {
   constructor(private authService: AuthService, private router: Router) {}
 
 ngOnInit(): void {
-  console.log("🚨 EL LOADING COMPONENT SE ESTÁ RENDERIZANDO");
   setTimeout(() => {
     const userString = localStorage.getItem('user');
     let token = null;
