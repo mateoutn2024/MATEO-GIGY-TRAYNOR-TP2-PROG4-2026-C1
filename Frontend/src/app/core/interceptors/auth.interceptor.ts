@@ -18,8 +18,6 @@ intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> 
         }
     }
     
-    console.log('🚨 INTERCEPTOR DISPARADO! Token encontrado:', token ? 'SÍ' : 'NO, está vacío');
-
     if (token) {
         const clonada = req.clone({
             setHeaders: { 
