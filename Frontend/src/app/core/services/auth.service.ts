@@ -33,15 +33,17 @@ export class AuthService {
   }
 
   autorizarToken(): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.post(`${this.apiUrl}/autorizar`, {}, { headers });
+    return this.http.post(`${this.apiUrl}/autorizar`, {});
   }
 
   refrescarToken(): Observable<any> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.post('http://localhost:3000/auth/refrescar', {}, { headers });
+  }
+
+  validateToken(): Observable<any> {
+  return this.http.get(`${this.apiUrl}validate`);
   }
 
   iniciarContadorSesion(): void {

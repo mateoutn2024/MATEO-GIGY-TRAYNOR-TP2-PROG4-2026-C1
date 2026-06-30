@@ -5,28 +5,29 @@ import { Observable } from 'rxjs';
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
 
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    const userJson = localStorage.getItem('user');
-    
+intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    const userString = localStorage.getItem('user');
     let token = '';
-    if (userJson) {
-      try {
-        const user = JSON.parse(userJson);
-        token = user.access_token || user.token || '';
-      } catch (e) {
-        console.error("Error al leer el token del localStorage", e);
-      }
+
+    if (userString) {
+        try {
+            const user = JSON.parse(userString);
+            token = user.access_token; 
+        } catch (e) {
+            console.error('Error parseando el usuario:', e);
+        }
     }
+    
+    console.log('🚨 INTERCEPTOR DISPARADO! Token encontrado:', token ? 'SÍ' : 'NO, está vacío');
 
     if (token) {
-      const clonada = req.clone({
-        setHeaders: { 
-          Authorization: `Bearer ${token}` 
-        }
-      });
-      return next.handle(clonada);
+        const clonada = req.clone({
+            setHeaders: { 
+                Authorization: `Bearer ${token}` 
+            }
+        });
+        return next.handle(clonada);
     }
 
     return next.handle(req);
-  }
-}
+}}

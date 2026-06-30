@@ -189,3 +189,20 @@
     }
   }
 }
+
+.dashboard-container { padding: 20px; }
+.form-control { display: block; margin-bottom: 10px; width: 100%; padding: 8px; }
+.roles-radio { margin: 15px 0; }
+table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+
+.error-msg {
+  color: #dc3545; /* Rojo tipo Bootstrap */
+  font-size: 0.8rem;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.form-control.ng-invalid.ng-touched {
+  border: 1px solid #dc3545; /* Borde rojo al input erróneo */
+}

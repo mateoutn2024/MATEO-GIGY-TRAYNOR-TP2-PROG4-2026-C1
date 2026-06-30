@@ -10,13 +10,14 @@ import { AdminGuard } from './core/guard/admin.guard';
 import { DashboardEstadisticasComponent } from './features/dashboard/estadisticas/dashboard-estadisticas.component';
 
 export const routes: Routes = [
-  { path: '', component: LoadingComponent, pathMatch: 'full' },
+  { path: '', redirectTo: 'publicaciones', pathMatch: 'full' },
+  { path: 'loading', component: LoadingComponent },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
-  { path: 'publications', component: PublicationsComponent }, 
+  { path: 'publicaciones', component: PublicationsComponent }, 
   { path: 'publicaciones/:id', component: PublicacionDetalleComponent },
   { path: 'profile', component: MyProfileComponent },
   { path: 'dashboard/usuarios', component: DashboardUsuariosComponent, canActivate: [AdminGuard] },
   { path: 'dashboard/estadisticas', component: DashboardEstadisticasComponent, canActivate: [AdminGuard] },
-  { path: '**', redirectTo: '' }
+  { path: '**', redirectTo: 'publicaciones' }
 ];

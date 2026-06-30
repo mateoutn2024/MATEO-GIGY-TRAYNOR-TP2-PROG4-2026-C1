@@ -8,38 +8,61 @@ import { AuthService } from '../../core/services/auth.service';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="loading-screen" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #ffffff; font-family: sans-serif;">
-      <div class="spinner" style="border: 4px solid rgba(0, 0, 0, 0.1); width: 45px; height: 45px; border-radius: 50%; border-left-color: #0056b3; animation: spin 0.8s linear infinite;"></div>
-      <p style="margin-top: 15px; color: #666; font-size: 14px; font-weight: 500;">Iniciando aplicación...</p>
+    <div class="loading-screen">
+      <div class="spinner"></div>
+      <p>Iniciando aplicación...</p>
     </div>
-    <style>
-      @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
-  `
+  `,
+  styles: [`
+    .loading-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background-color: #ffffff; /* ¡Blanco opaco! */
+      z-index: 99999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #0056b3;
+      border-radius: 50%;
+      width: 40px; height: 40px;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  `]
 })
 export class LoadingComponent implements OnInit {
   constructor(private authService: AuthService, private router: Router) {}
 
-  ngOnInit(): void {
-    const token = localStorage.getItem('token');
-    
+ngOnInit(): void {
+  console.log("🚨 EL LOADING COMPONENT SE ESTÁ RENDERIZANDO");
+  setTimeout(() => {
+    const userString = localStorage.getItem('user');
+    let token = null;
+
+    if (userString) {
+      try {
+        token = JSON.parse(userString).access_token;
+      } catch (e) {}
+    }
+
     if (!token) {
       this.router.navigate(['/login']);
       return;
     }
 
     this.authService.autorizarToken().subscribe({
-      next: (res) => {
-        if (res.valido) {
-          this.authService.iniciarContadorSesion();
-          this.router.navigate(['/publicaciones']); 
-        } else {
-          this.router.navigate(['/login']);
-        }
+      next: () => {
+        this.router.navigate(['/publicaciones']);
       },
       error: () => {
-        this.router.navigate(['/login']); 
+        localStorage.removeItem('user');
+        this.router.navigate(['/login']);
       }
     });
-  }
+  }, 1200); 
+}
 }

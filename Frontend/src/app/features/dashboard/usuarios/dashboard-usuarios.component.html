@@ -3,26 +3,42 @@
 
   <div class="seccion-crear">
     <h3>Alta de Nuevo Usuario</h3>
-    <form (ngSubmit)="registrarUsuario()">
-      <input type="text" [(ngModel)]="nuevoUsuario.firstName" name="firstName" placeholder="Nombre" required class="form-control">
-      <input type="text" [(ngModel)]="nuevoUsuario.lastName" name="lastName" placeholder="Apellido" required class="form-control">
-      <input type="email" [(ngModel)]="nuevoUsuario.email" name="email" placeholder="Correo electrónico" required class="form-control">
-      <input type="text" [(ngModel)]="nuevoUsuario.username" name="username" placeholder="Nombre de usuario" required class="form-control">
-      <input type="password" [(ngModel)]="nuevoUsuario.password" name="password" placeholder="Contraseña" required class="form-control">
-      <input type="date" [(ngModel)]="nuevoUsuario.birthDate" name="birthDate" required class="form-control">
-      <input type="text" [(ngModel)]="nuevoUsuario.description" name="description" placeholder="Descripción corta" required class="form-control">
+    <form #userForm="ngForm" (ngSubmit)="registrarUsuario(userForm)">
+      
+      <input type="text" [(ngModel)]="nuevoUsuario.firstName" name="firstName" #firstName="ngModel" placeholder="Nombre" required class="form-control">
+      <div *ngIf="firstName.invalid && (firstName.dirty || firstName.touched)" class="error-msg">Obligatorio.</div>
+
+      <input type="text" [(ngModel)]="nuevoUsuario.lastName" name="lastName" #lastName="ngModel" placeholder="Apellido" required class="form-control">
+      <div *ngIf="lastName.invalid && (lastName.dirty || lastName.touched)" class="error-msg">Obligatorio.</div>
+
+      <input type="email" [(ngModel)]="nuevoUsuario.email" name="email" #email="ngModel" placeholder="Correo electrónico" required email class="form-control">
+      <div *ngIf="email.invalid && (email.dirty || email.touched)" class="error-msg">Correo inválido u obligatorio.</div>
+
+      <input type="text" [(ngModel)]="nuevoUsuario.username" name="username" #username="ngModel" placeholder="Nombre de usuario" required class="form-control">
+      <div *ngIf="username.invalid && (username.dirty || username.touched)" class="error-msg">Obligatorio.</div>
+      
+      <input type="password" [(ngModel)]="nuevoUsuario.password" name="password" #password="ngModel" placeholder="Contraseña" required minlength="6" class="form-control">
+      <div *ngIf="password.invalid && (password.dirty || password.touched)" class="error-msg">Mínimo 6 caracteres.</div>
+      
+      <input type="password" [(ngModel)]="nuevoUsuario.confirmPassword" name="confirmPassword" #confirm="ngModel" placeholder="Repetir contraseña" required class="form-control">
+      <div *ngIf="nuevoUsuario.password !== nuevoUsuario.confirmPassword && confirm.touched" class="error-msg">Las contraseñas no coinciden.</div>
+      
+      <input type="date" [(ngModel)]="nuevoUsuario.birthDate" name="birthDate" #birthDate="ngModel" required class="form-control">
+      <div *ngIf="birthDate.invalid && (birthDate.dirty || birthDate.touched)" class="error-msg">Obligatorio.</div>
+      
+      <input type="text" [(ngModel)]="nuevoUsuario.description" name="description" #description="ngModel" placeholder="Descripción corta" required class="form-control">
+      <div *ngIf="description.invalid && (description.dirty || description.touched)" class="error-msg">Obligatorio.</div>
+      
+      <label>Subir imagen:</label>
+      <input type="file" (change)="onFileSelected($event)" accept="image/*" class="form-control">
 
       <div class="roles-radio">
         <strong>Rol asignado:</strong>
-        <label>
-          <input type="radio" [(ngModel)]="nuevoUsuario.role" name="role" value="usuario"> Usuario
-        </label>
-        <label>
-          <input type="radio" [(ngModel)]="nuevoUsuario.role" name="role" value="administrador"> Administrador
-        </label>
+        <label><input type="radio" [(ngModel)]="nuevoUsuario.role" name="role" value="usuario" required> Usuario</label>
+        <label><input type="radio" [(ngModel)]="nuevoUsuario.role" name="role" value="administrador"> Administrador</label>
       </div>
 
-      <button type="submit">
+      <button type="submit" [disabled]="userForm.invalid || nuevoUsuario.password !== nuevoUsuario.confirmPassword">
         Crear Usuario
       </button>
     </form>
@@ -34,21 +50,14 @@
     <h3>Listado de Usuarios Registrados</h3>
     <table>
       <thead>
-        <tr>
-          <th>Usuario</th>
-          <th>Nombre</th>
-          <th>Email</th>
-          <th>Rol</th>
-          <th>Estado</th>
-          <th>Acción</th>
-        </tr>
+        <tr><th>Usuario</th><th>Nombre</th><th>Email</th><th>Rol</th><th>Estado</th><th>Acción</th></tr>
       </thead>
       <tbody>
         <tr *ngFor="let u of usuarios">
           <td><strong>{{ u.username }}</strong></td>
           <td>{{ u.firstName }} {{ u.lastName }}</td>
           <td>{{ u.email }}</td>
-          <td><span>{{ u.role }}</span></td>
+          <td>{{ u.role }}</td>
           <td>{{ u.activo ? '🟢 Activo' : '🔴 Deshabilitado' }}</td>
           <td>
             <button (click)="cambiarEstado(u)" [style.background-color]="u.activo ? '#dc3545' : '#198754'">

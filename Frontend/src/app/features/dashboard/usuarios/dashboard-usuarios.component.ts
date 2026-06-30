@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsuariosService } from '../../../core/services/usuarios.service';
+
 @Component({
   selector: 'app-dashboard-usuarios',
   standalone: true,
@@ -18,11 +19,13 @@ export class DashboardUsuariosComponent implements OnInit {
     email: '',
     username: '',
     password: '',
+    confirmPassword: '',
     birthDate: '',
     description: '',
-    avatarUrl: '/uploads/avatars/default.png',
     role: 'usuario'
   };
+
+  selectedFile: File | null = null;
 
   constructor(private usuariosService: UsuariosService) {}
 
@@ -30,24 +33,51 @@ export class DashboardUsuariosComponent implements OnInit {
     this.cargarUsuarios();
   }
 
-    cargarUsuarios(): void {
+  cargarUsuarios(): void {
     this.usuariosService.obtenerUsuarios().subscribe({
-        next: (res: any) => {
+      next: (res: any) => {
         this.usuarios = Array.isArray(res) ? res : (res?.data || []);
-        
-        console.log('-> USUARIOS DESEMPAQUETADOS EN ANGULAR:', this.usuarios);
-        },
-        error: (err: any) => console.error('Error al cargar usuarios:', err)
+      },
+      error: (err: any) => console.error('Error al cargar usuarios:', err)
     });
-    }
+  }
 
-  registrarUsuario(): void {
+  onFileSelected(event: any): void {
+    if (event.target.files.length > 0) {
+      this.selectedFile = event.target.files[0];
+    }
+  }
+
+  registrarUsuario(userForm: any): void {
+    if (userForm.invalid || this.nuevoUsuario.password !== this.nuevoUsuario.confirmPassword) {
+    alert('Por favor, revisá que los campos sean correctos y las contraseñas coincidan.');
+    return;
+  }
     if (!this.nuevoUsuario.email || !this.nuevoUsuario.password || !this.nuevoUsuario.username) {
       alert('Completá los campos obligatorios');
       return;
     }
 
-    this.usuariosService.crearUsuarioAdmin(this.nuevoUsuario).subscribe({
+    if (this.nuevoUsuario.password !== this.nuevoUsuario.confirmPassword) {
+      alert('Las contraseñas no coinciden');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('firstName', this.nuevoUsuario.firstName);
+    formData.append('lastName', this.nuevoUsuario.lastName);
+    formData.append('email', this.nuevoUsuario.email);
+    formData.append('username', this.nuevoUsuario.username);
+    formData.append('password', this.nuevoUsuario.password);
+    formData.append('birthDate', this.nuevoUsuario.birthDate);
+    formData.append('description', this.nuevoUsuario.description);
+    formData.append('role', this.nuevoUsuario.role);
+    
+    if (this.selectedFile) {
+      formData.append('avatar', this.selectedFile);
+    }
+
+    this.usuariosService.crearUsuarioAdmin(formData).subscribe({
       next: () => {
         alert('Usuario creado con éxito');
         this.cargarUsuarios();
@@ -77,10 +107,11 @@ export class DashboardUsuariosComponent implements OnInit {
       email: '',
       username: '',
       password: '',
+      confirmPassword: '',
       birthDate: '',
       description: '',
-      avatarUrl: '/uploads/avatars/default.png',
       role: 'usuario'
     };
+    this.selectedFile = null;
   }
 }
