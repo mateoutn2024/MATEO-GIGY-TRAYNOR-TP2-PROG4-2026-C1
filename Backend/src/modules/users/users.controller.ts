@@ -16,23 +16,6 @@ export class UsersController {
     return this.usersService.listarTodos();
   }
 
-  @Post()
-  @HttpCode(HttpStatus.CREATED)
-  async crearUsuario(@Body() body: any) {
-    return this.usersService.crearDesdeAdmin(body);
-  }
-
-  @Delete(':id')
-  @HttpCode(HttpStatus.OK)
-  async deshabilitar(@Param('id') id: string) {
-    return this.usersService.cambiarEstado(id, false);
-  }
-
-  @Post('alta/:id')
-  @HttpCode(HttpStatus.OK)
-  async rehabilitar(@Param('id') id: string) {
-    return this.usersService.cambiarEstado(id, true);
-  }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -51,4 +34,17 @@ export class UsersController {
     console.log('-> DATOS RECIBIDOS EN EL BACKEND:', body);
     return this.usersService.crearDesdeAdmin(body);
   }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  async deshabilitar(@Param('id') id: string) {
+    return this.usersService.cambiarEstado(id, false);
+  }
+
+  @Post('alta/:id')
+  @HttpCode(HttpStatus.OK)
+  async rehabilitar(@Param('id') id: string) {
+    return this.usersService.cambiarEstado(id, true);
+  }
+
 }
