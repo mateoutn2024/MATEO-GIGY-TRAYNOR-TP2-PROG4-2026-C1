@@ -48,7 +48,6 @@ export class DashboardEstadisticasComponent implements OnInit {
     cargarGraficoPubsPorUsuario(): void {
         this.pubService.obtenerStatsPubsPorUsuario(this.fechaInicio, this.fechaFin).subscribe({
         next: (res: any) => {
-            // BLINDAJE: Si viene envuelto en { data: [...] } lo saca, si ya es array lo usa directamente
             const lista = Array.isArray(res) ? res : (res?.data || []);
 
             const labels = lista.map((d: any) => d.username || d.nombreUsuario || 'Usuario');
@@ -101,7 +100,6 @@ export class DashboardEstadisticasComponent implements OnInit {
     cargarGraficoComentariosPorPub(): void {
         this.pubService.obtenerStatsComentariosPorPub(this.fechaInicio, this.fechaFin).subscribe({
         next: (res: any) => {
-            // BLINDAJE EXACTAMENTE IGUAL AL ANTERIOR:
             const lista = Array.isArray(res) ? res : (res?.data || []);
 
             const labels = lista.map((d: any) => d.titulo ? (d.titulo.length > 15 ? d.titulo.substring(0, 15) + '...' : d.titulo) : 'Sin título');
