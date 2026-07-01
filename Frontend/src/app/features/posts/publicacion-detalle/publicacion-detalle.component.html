@@ -42,11 +42,11 @@
           <p class="comentario-texto">{{ com.mensaje | censurarPalabras }}</p>
           <span *ngIf="com.modificado" class="comentario-editado">• Editado</span>
           
-          <button *ngIf="(com.usuarioId && (com.usuarioId == usuarioLogueadoId || com.usuarioId._id == usuarioLogueadoId || com.usuario?._id == usuarioLogueadoId))" 
-                  class="btn-editar" 
-                  (click)="activarModoEdicion(com)">
-            Editar
-          </button>
+        <button *ngIf="(com.usuario && com.usuario._id === usuarioLogueadoId) || com.usuarioId === usuarioLogueadoId || com.usuarioId?._id === usuarioLogueadoId || esAdmin" 
+                class="btn-editar" 
+                (click)="activarModoEdicion(com)">
+          Editar
+        </button>
         </div>
 
         <div *ngIf="comentarioEditandoId == com._id" class="box-edicion">
